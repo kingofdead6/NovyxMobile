@@ -127,13 +127,14 @@ export default function AdminAccessoriesCategories() {
 
       <AnimatePresence>
         {showModal && (
-          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.75)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-            <motion.div initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
-              style={{ background: "rgba(15,23,42,.98)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 24, width: "100%", maxWidth: 480, padding: 32 }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
+          <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.8)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              style={{ background: "#0D1526", border: "1px solid rgba(255,255,255,.1)", borderRadius: 24, width: "100%", maxWidth: 480, maxHeight: "85vh", display: "flex", flexDirection: "column", boxShadow: "0 24px 80px rgba(0,0,0,.6)" }}>
+              <div style={{ padding: "24px 28px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,.07)", flexShrink: 0 }}>
                 <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, color: "#fff", margin: 0 }}>{editingId ? "Edit Category" : "New Category"}</h2>
-                <button onClick={resetForm} style={{ background: "none", border: "none", color: "#94A3B8", cursor: "pointer" }}><X size={22} /></button>
+                <button onClick={resetForm} style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", color: "#94A3B8", borderRadius: 10, padding: 6, cursor: "pointer", display: "flex" }}><X size={18} /></button>
               </div>
+              <div style={{ overflowY: "auto", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 16 }}>
               <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <input required placeholder="Category name" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
                   style={{ padding: "14px 16px", borderRadius: 12, border: "1px solid rgba(255,255,255,.12)", background: "rgba(255,255,255,.05)", color: "#fff", fontSize: 15, outline: "none" }} />
@@ -154,6 +155,7 @@ export default function AdminAccessoriesCategories() {
                   <button type="button" onClick={resetForm} style={{ flex: 1, padding: "14px", background: "rgba(255,255,255,.05)", color: "#94A3B8", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, fontWeight: 700, fontSize: 15, cursor: "pointer" }}>Cancel</button>
                 </div>
               </form>
+              </div>
             </motion.div>
           </div>
         )}

@@ -4,10 +4,11 @@ import axios from "axios";
 import { API_BASE_URL } from "../../../api";
 
 const BRAND_GRADIENTS = [
+  ["#F59E0B", "#92400E"],
   ["#6C2BD9", "#4C1D95"],
   ["#0EA5E9", "#0369A1"],
   ["#10B981", "#065F46"],
-  ["#F59E0B", "#92400E"],
+  
   ["#EC4899", "#9D174D"],
   ["#22D3EE", "#0E7490"],
 ];
@@ -15,32 +16,30 @@ const BRAND_GRADIENTS = [
 export default function CategoriesSection() {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-
   const navigate = useNavigate();
 
   useEffect(() => {
     axios
       .get(`${API_BASE_URL}/phone-brands`)
-      .then((res) => {
-        console.log("Phone Brands:", res.data);
-        setCategories(res.data);
-      })
-      .catch((err) => {
-        console.error("Failed to load phone brands:", err);
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+      .then((r) => setCategories(r.data))
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, []);
 
   if (loading) {
     return (
-      <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "60px 26px 30px" }}>
+        <div style={{ display: "flex", gap: 14, height: 330 }}>
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="h-[320px] animate-pulse rounded-3xl border border-white/10 bg-white/5"
+              style={{
+                flex: 1,
+                borderRadius: 24,
+                background: "rgba(255,255,255,.04)",
+                border: "1px solid rgba(255,255,255,.06)",
+                animation: "glowPulse 1.8s infinite",
+              }}
             />
           ))}
         </div>
@@ -49,85 +48,128 @@ export default function CategoriesSection() {
   }
 
   return (
-    <section className="mx-auto max-w-7xl px-6 py-16">
-      <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
+    <section style={{ maxWidth: 1280, margin: "0 auto", padding: "60px 26px 30px" }}>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "flex-end",
+          justifyContent: "space-between",
+          gap: 20,
+          marginBottom: 30,
+          flexWrap: "wrap",
+        }}
+      >
         <div>
-          <p className="mb-2 font-mono text-xs uppercase tracking-[0.25em] text-cyan-400">
-            Shop By Brand
+          <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 12.5, letterSpacing: ".12em", color: "#22D3EE", margin: "0 0 10px" }}>
+            // SHOP BY CATEGORY
           </p>
-
-          <h2 className="text-3xl font-bold tracking-tight text-white md:text-5xl">
-            Explore Every Phone Brand
+          <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(28px,4vw,46px)", letterSpacing: "-.02em", margin: 0 }}>
+            Every category, one place.
           </h2>
         </div>
 
         <button
           onClick={() => navigate("/products")}
-          className="text-sm font-semibold text-slate-400 transition hover:text-white"
+          style={{
+            fontFamily: "'Manrope'",
+            fontWeight: 600,
+            color: "#94A3B8",
+            background: "none",
+            border: "none",
+            cursor: "pointer",
+            fontSize: 15,
+            transition: "color .25s",
+          }}
+          onMouseEnter={(e) => (e.currentTarget.style.color = "#fff")}
+          onMouseLeave={(e) => (e.currentTarget.style.color = "#94A3B8")}
         >
-          View All →
+          View all
         </button>
       </div>
 
-      <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="nv-brand-row">
         {categories.map((cat, idx) => {
-          const [g1, g2] =
-            BRAND_GRADIENTS[idx % BRAND_GRADIENTS.length];
-
+          const [g1, g2] = BRAND_GRADIENTS[idx % BRAND_GRADIENTS.length];
           return (
             <div
               key={cat._id}
-              onClick={() =>
-                navigate(
-                  `/products?brand=${encodeURIComponent(cat.name)}`
-                )
-              }
-              className="group relative min-h-[320px] cursor-pointer overflow-hidden rounded-3xl border border-white/10 bg-white/[0.03] transition-all duration-500 hover:-translate-y-2 hover:border-cyan-400/40"
+              className="nv-brand-card"
+              onClick={() => navigate(`/products?category=${encodeURIComponent(cat.name)}`)}
+              style={{
+                position: "relative",
+                borderRadius: 24,
+                cursor: "pointer",
+                border: "1px solid rgba(255,255,255,.08)",
+                background: "linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.01))",
+              }}
             >
-              {/* Gradient Background */}
-              <div
-                className="absolute inset-0 opacity-60"
-                style={{
-                  background: `radial-gradient(circle at 50% 120%, ${g1}, transparent 70%)`,
-                }}
-              />
+              {/* Clipped background layer — contains glows so they don't bleed outside */}
+              <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", zIndex: 0 }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: 0,
+                    background: `radial-gradient(circle at 50% 120%,${g1},transparent 70%)`,
+                    opacity: 0.55,
+                  }}
+                />
+                <div
+                  style={{
+                    position: "absolute",
+                    top: -30,
+                    right: -30,
+                    width: 140,
+                    height: 140,
+                    borderRadius: "50%",
+                    background: `linear-gradient(135deg,${g1},${g2})`,
+                    filter: "blur(34px)",
+                    opacity: 0.6,
+                    animation: "blob 12s ease-in-out infinite",
+                  }}
+                />
+              </div>
 
-              {/* Glow Blob */}
-              <div
-                className="absolute -right-10 -top-10 h-40 w-40 rounded-full opacity-50 blur-3xl"
-                style={{
-                  background: `linear-gradient(135deg, ${g1}, ${g2})`,
-                }}
-              />
-
-              {/* Brand Logo Background */}
+              {/* Logo — pops above card on hover via CSS */}
               {cat.logo?.url && (
-                <div className="absolute inset-0">
-                  <img
-                    src={cat.logo.url}
-                    alt={cat.name}
-                    className="h-full w-full object-cover opacity-20 transition duration-700 group-hover:scale-110 group-hover:opacity-30"
-                  />
-
-                  <div className="absolute inset-0 bg-black/40" />
-                </div>
+                <img
+                  src={cat.logo.url}
+                  alt={cat.name}
+                  className="nv-brand-logo"
+                />
               )}
 
-              {/* Content */}
-              <div className="relative z-10 flex h-full min-h-[320px] flex-col justify-between p-6">
+              <div
+                style={{
+                  position: "relative",
+                  zIndex: 2,
+                  height: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  padding: 22,
+                }}
+              >
+                <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, color: "rgba(255,255,255,.6)" }}>
+                  Category
+                </span>
                 <div>
-                  <span className="font-mono text-xs uppercase tracking-wider text-white/60">
-                    Phone Brand
-                  </span>
-                </div>
-
-                <div>
-                  <h3 className="mb-2 text-2xl font-bold text-white">
+                  <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: "0 0 6px" }}>
                     {cat.name}
                   </h3>
-
                   {cat.description && (
-                    <p className="line-clamp-2 text-sm leading-relaxed text-white/70">
+                    <p
+                      style={{
+                        fontFamily: "'Manrope'",
+                        fontSize: 13,
+                        color: "rgba(255,255,255,.6)",
+                        margin: 0,
+                        lineHeight: 1.4,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
                       {cat.description}
                     </p>
                   )}
@@ -137,12 +179,6 @@ export default function CategoriesSection() {
           );
         })}
       </div>
-
-      {!loading && categories.length === 0 && (
-        <div className="py-16 text-center text-slate-400">
-          No phone brands found.
-        </div>
-      )}
     </section>
   );
 }

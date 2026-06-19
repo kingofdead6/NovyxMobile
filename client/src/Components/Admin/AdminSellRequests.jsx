@@ -19,7 +19,7 @@ export default function AdminSellRequests() {
       });
       setRequests(res.data);
     } catch (err) {
-      toast.error("Erreur de chargement");
+      toast.error("Failed to load");
     } finally {
       setLoading(false);
     }
@@ -30,23 +30,23 @@ export default function AdminSellRequests() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Supprimer cette proposition ?")) return;
+    if (!confirm("Delete this sell request?")) return;
     try {
       await axios.delete(`${API_BASE_URL}/sell-requests/${id}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-      toast.success("Proposition supprimée");
+      toast.success("Request deleted");
       fetchRequests();
     } catch (err) {
-      toast.error("Erreur lors de la suppression");
+      toast.error("Failed to delete");
     }
   };
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <div className="p-8">Loading...</div>;
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-light mb-10">Propositions de Vente</h1>
+      <h1 className="text-4xl font-light mb-10">Sell Requests</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {requests.map((req) => (
@@ -81,13 +81,13 @@ export default function AdminSellRequests() {
             <div className="mt-8 text-sm text-stone-500">
               <p><strong>{req.name}</strong> • {req.phone}</p>
               <p>{req.email}</p>
-              <p className="text-xs mt-2">{new Date(req.createdAt).toLocaleDateString('fr-FR')}</p>
+              <p className="text-xs mt-2">{new Date(req.createdAt).toLocaleDateString('en-GB')}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {requests.length === 0 && <p className="text-center text-stone-500 py-20">Aucune proposition pour le moment.</p>}
+      {requests.length === 0 && <p className="text-center text-stone-500 py-20">No sell requests yet.</p>}
     </div>
   );
 }

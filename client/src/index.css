@@ -148,16 +148,44 @@ body {
   display: flex;
   gap: 14px;
   height: 330px;
+  /* allow logo images to overflow upward out of cards */
+  overflow: visible;
 }
 .nv-brand-card {
   flex: 1;
   min-width: 64px;
   transition: flex .6s cubic-bezier(.2,.9,.3,1), box-shadow .4s, border-color .4s;
+  /* stacking context so z-index on logo works per-card */
+  isolation: isolate;
 }
 .nv-brand-card:hover {
   flex: 2.6;
   box-shadow: 0 30px 60px -20px rgba(108,43,217,.6);
   border-color: rgba(139,92,246,.5);
+}
+
+/* Brand logo — sits centered, rises above the card on hover */
+.nv-brand-logo {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%) scale(0.85);
+  width: 80%;
+  max-width: 180px;
+  height: 55%;
+  object-fit: contain;
+  opacity: 0.18;
+  z-index: 1;
+  pointer-events: none;
+  transition: transform .5s cubic-bezier(.2,.9,.3,1), opacity .4s, filter .4s, bottom .5s cubic-bezier(.2,.9,.3,1);
+  filter: drop-shadow(0 0 0px transparent);
+}
+.nv-brand-card:hover .nv-brand-logo {
+  transform: translateX(-50%) scale(1.15);
+  bottom: 60%;
+  opacity: 1;
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,.6));
+  z-index: 10;
 }
 
 /* ── Progress bar ── */

@@ -30,8 +30,8 @@ const S = {
   actionRow: { display: "flex", gap: 8, marginTop: 12 },
   editBtn: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "9px", background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", color: "#A78BFA", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer" },
   delBtn: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "9px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", color: "#FCA5A5", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer" },
-  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,.8)", zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center" },
-  modal: { background: "#0D1526", border: "1px solid rgba(255,255,255,.1)", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 560, maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,.5)" },
+  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,.8)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: "16px" },
+  modal: { background: "#0D1526", border: "1px solid rgba(255,255,255,.1)", borderRadius: 24, width: "100%", maxWidth: 560, maxHeight: "85vh", display: "flex", flexDirection: "column", boxShadow: "0 24px 80px rgba(0,0,0,.6)" },
   modalHeader: { padding: "24px 28px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,.07)" },
   modalTitle: { fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, color: "#fff", margin: 0 },
   closeBtn: { background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", color: "#94A3B8", borderRadius: 10, padding: 6, cursor: "pointer", display: "flex" },
@@ -72,7 +72,7 @@ export default function AdminAccessories() {
   const fetchItems = async () => {
     setLoading(true);
     try { const res = await axios.get(`${API_BASE_URL}/accessories`, { headers: authH() }); setItems(res.data); }
-    catch { toast.error("Erreur de chargement"); }
+    catch { toast.error("Failed to load"); }
     finally { setLoading(false); }
   };
 
@@ -92,10 +92,10 @@ export default function AdminAccessories() {
     ["name", "category", "price", "stock", "brand", "description"].forEach(k => fd.append(k, form[k]));
     form.images.filter(i => i.file).forEach(i => fd.append("images", i.file));
     try {
-      if (editingId) { await axios.put(`${API_BASE_URL}/accessories/${editingId}`, fd, { headers: authH() }); toast.success("Accessoire mis à jour"); }
-      else { await axios.post(`${API_BASE_URL}/accessories`, fd, { headers: authH() }); toast.success("Accessoire créé"); }
+      if (editingId) { await axios.put(`${API_BASE_URL}/accessories/${editingId}`, fd, { headers: authH() }); toast.success("Accessory updated"); }
+      else { await axios.post(`${API_BASE_URL}/accessories`, fd, { headers: authH() }); toast.success("Accessory created"); }
       resetForm(); fetchItems();
-    } catch (err) { toast.error(err.response?.data?.message || "Erreur"); }
+    } catch (err) { toast.error(err.response?.data?.message || "Error"); }
     finally { setSaving(false); }
   };
 
@@ -106,31 +106,31 @@ export default function AdminAccessories() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Supprimer cet accessoire ?")) return;
-    try { await axios.delete(`${API_BASE_URL}/accessories/${id}`, { headers: authH() }); setItems(p => p.filter(x => x._id !== id)); toast.success("Supprimé"); }
-    catch { toast.error("Erreur"); }
+    if (!confirm("Delete this accessory?")) return;
+    try { await axios.delete(`${API_BASE_URL}/accessories/${id}`, { headers: authH() }); setItems(p => p.filter(x => x._id !== id)); toast.success("Deleted"); }
+    catch { toast.error("Error"); }
   };
 
   return (
     <div style={S.page}>
       <div style={S.inner}>
         <div style={S.header}>
-          <h1 style={S.h1}>Accessoires</h1>
-          <button style={S.addBtn} onClick={() => setShowModal(true)}><Plus size={20} /> Nouveau</button>
+          <h1 style={S.h1}>Accessories</h1>
+          <button style={S.addBtn} onClick={() => setShowModal(true)}><Plus size={20} /> New</button>
         </div>
 
         <div style={S.toolbar}>
           <div style={S.searchWrap}>
             <Search style={S.searchIcon} size={17} />
-            <input style={S.searchInput} placeholder="Rechercher..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+            <input style={S.searchInput} placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
           <select style={S.select} value={selectedCat} onChange={e => setSelectedCat(e.target.value)}>
-            <option value="">Toutes les catégories</option>
+            <option value="">All categories</option>
             {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
           </select>
         </div>
 
-        {filtered.length === 0 && !loading && <p style={S.empty}>Aucun accessoire trouvé</p>}
+        {filtered.length === 0 && !loading && <p style={S.empty}>No accessories found</p>}
 
         <div style={S.grid}>
           {filtered.map((item, i) => (
@@ -146,8 +146,8 @@ export default function AdminAccessories() {
                 <p style={S.price}>{item.price?.toLocaleString()} DA</p>
                 <p style={S.muted}>Stock: {item.stock ?? 0}</p>
                 <div style={S.actionRow}>
-                  <button style={S.editBtn} onClick={() => handleEdit(item)}><Edit size={13} /> Modifier</button>
-                  <button style={S.delBtn} onClick={() => handleDelete(item._id)}><Trash2 size={13} /> Suppr.</button>
+                  <button style={S.editBtn} onClick={() => handleEdit(item)}><Edit size={13} /> Edit</button>
+                  <button style={S.delBtn} onClick={() => handleDelete(item._id)}><Trash2 size={13} /> Delete</button>
                 </div>
               </div>
             </motion.div>
@@ -158,30 +158,30 @@ export default function AdminAccessories() {
       <AnimatePresence>
         {showModal && (
           <motion.div style={S.overlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <motion.div style={S.modal} initial={{ y: 80 }} animate={{ y: 0 }} exit={{ y: 80 }} transition={{ type: "spring", damping: 28, stiffness: 300 }}>
+            <motion.div style={S.modal} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} transition={{ type: "spring", damping: 28, stiffness: 300 }}>
               <div style={S.modalHeader}>
-                <h2 style={S.modalTitle}>{editingId ? "Modifier l'accessoire" : "Nouvel accessoire"}</h2>
+                <h2 style={S.modalTitle}>{editingId ? "Edit accessory" : "New accessory"}</h2>
                 <button style={S.closeBtn} onClick={resetForm}><X size={18} /></button>
               </div>
               <div style={S.formScroll}>
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-                  <input required placeholder="Nom *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={S.input} />
+                  <input required placeholder="Name *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={S.input} />
                   <select required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={S.input}>
-                    <option value="">Catégorie *</option>
+                    <option value="">Category *</option>
                     {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                   </select>
                   <div style={S.row2}>
-                    <input required type="number" placeholder="Prix (DA) *" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} style={S.input} />
+                    <input required type="number" placeholder="Price (DA) *" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} style={S.input} />
                     <input type="number" placeholder="Stock" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} style={S.input} />
                   </div>
-                  <input placeholder="Marque" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} style={S.input} />
+                  <input placeholder="Brand" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} style={S.input} />
                   <textarea placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} style={S.textarea} />
                   <div>
                     <span style={S.sectionLabel}>Images (max 8)</span>
                     <label style={S.fileZone}>
                       <input type="file" multiple accept="image/*" style={{ display: "none" }}
                         onChange={e => { const imgs = Array.from(e.target.files).map(f => ({ file: f, preview: URL.createObjectURL(f) })); setForm(p => ({ ...p, images: [...p.images, ...imgs].slice(0, 8) })); }} />
-                      + Ajouter des images
+                      + Add images
                     </label>
                     {form.images.length > 0 && (
                       <div style={S.thumbGrid}>
@@ -195,8 +195,8 @@ export default function AdminAccessories() {
                     )}
                   </div>
                   <div style={S.btnRow}>
-                    <button type="submit" disabled={saving} style={{ ...S.submitBtn, opacity: saving ? 0.7 : 1 }}>{saving ? "Sauvegarde..." : editingId ? "Mettre à jour" : "Créer"}</button>
-                    <button type="button" onClick={resetForm} style={S.cancelBtn}>Annuler</button>
+                    <button type="submit" disabled={saving} style={{ ...S.submitBtn, opacity: saving ? 0.7 : 1 }}>{saving ? "Saving..." : editingId ? "Update" : "Create"}</button>
+                    <button type="button" onClick={resetForm} style={S.cancelBtn}>Cancel</button>
                   </div>
                 </form>
               </div>

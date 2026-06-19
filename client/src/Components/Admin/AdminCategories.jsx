@@ -13,14 +13,12 @@ export default function AdminCategories() {
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Add modal state
   const [showAddModal, setShowAddModal] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [newCategoryDescription, setNewCategoryDescription] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
 
-  // New state for button loading
   const [isCreating, setIsCreating] = useState(false);
 
   useEffect(() => {
@@ -43,7 +41,7 @@ export default function AdminCategories() {
       });
       setCategories(res.data);
     } catch (err) {
-      toast.error("Erreur lors du chargement des catégories");
+      toast.error("Failed to load categories");
     } finally {
       setLoading(false);
     }
@@ -60,10 +58,10 @@ export default function AdminCategories() {
   const handleAddCategory = async (e) => {
     e.preventDefault();
     if (!newCategoryName.trim()) {
-      return toast.error("Le nom de la catégorie est requis");
+      return toast.error("Category name is required");
     }
 
-    setIsCreating(true);   // ← Start loading state
+    setIsCreating(true);
 
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -87,11 +85,11 @@ export default function AdminCategories() {
       setCategories([...categories, res.data]);
       resetForm();
       setShowAddModal(false);
-      toast.success("Catégorie ajoutée avec succès");
+      toast.success("Category added successfully");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Erreur lors de l'ajout de la catégorie");
+      toast.error(err.response?.data?.message || "Failed to add category");
     } finally {
-      setIsCreating(false);   // ← Stop loading state (whether success or error)
+      setIsCreating(false);
     }
   };
 
@@ -103,7 +101,7 @@ export default function AdminCategories() {
   };
 
   const handleDeleteCategory = async (id, name) => {
-    if (!window.confirm(`Supprimer la catégorie "${name}" ?`)) return;
+    if (!window.confirm(`Delete category "${name}"?`)) return;
 
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
@@ -111,9 +109,9 @@ export default function AdminCategories() {
         headers: { Authorization: `Bearer ${token}` },
       });
       setCategories(categories.filter(cat => cat._id !== id));
-      toast.success("Catégorie supprimée");
+      toast.success("Category deleted");
     } catch (err) {
-      toast.error(err.response?.data?.message || "Erreur lors de la suppression");
+      toast.error(err.response?.data?.message || "Failed to delete");
     }
   };
 
@@ -128,10 +126,10 @@ export default function AdminCategories() {
           {/* Header */}
           <div className="text-center mb-10">
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-stone-950">
-              Gestion des Catégories
+              Category Management
             </h1>
             <p className="mt-4 text-lg text-stone-600">
-              Ajoutez, modifiez et gérez vos catégories avec images
+              Add, edit and manage your categories with images
             </p>
           </div>
 
@@ -142,14 +140,14 @@ export default function AdminCategories() {
               className="flex items-center justify-center gap-3 px-6 py-4 bg-stone-900 text-white font-medium rounded-2xl hover:bg-blue-700 transition"
             >
               <Plus size={24} />
-              Ajouter une catégorie
+              Add category
             </button>
 
             <div className="relative flex-1">
               <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" />
               <input
                 type="text"
-                placeholder="Rechercher une catégorie..."
+                placeholder="Search categories..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full pl-12 pr-4 py-4 border border-stone-300 rounded-2xl focus:border-stone-900 outline-none"
@@ -160,11 +158,11 @@ export default function AdminCategories() {
           {/* Categories Grid */}
           {loading ? (
             <div className="text-center py-20">
-              <p className="text-xl text-stone-500">Chargement...</p>
+              <p className="text-xl text-stone-500">Loading...</p>
             </div>
           ) : filteredCategories.length === 0 ? (
             <div className="text-center py-20">
-              <p className="text-2xl text-stone-400">Aucune catégorie trouvée</p>
+              <p className="text-2xl text-stone-400">No categories found</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
@@ -190,7 +188,7 @@ export default function AdminCategories() {
                       />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-stone-400 text-sm">
-                        Pas d'image disponible
+                        No image available
                       </div>
                     )}
 
@@ -239,9 +237,9 @@ export default function AdminCategories() {
               >
                 <div className="p-8">
                   <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-semibold">Nouvelle Catégorie</h2>
-                    <button 
-                      onClick={() => { setShowAddModal(false); resetForm(); }} 
+                    <h2 className="text-2xl font-semibold">New Category</h2>
+                    <button
+                      onClick={() => { setShowAddModal(false); resetForm(); }}
                       className="text-stone-400 hover:text-stone-600"
                     >
                       <X size={28} />
@@ -250,31 +248,31 @@ export default function AdminCategories() {
 
                   <form onSubmit={handleAddCategory} className="space-y-6">
                     <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-2">Nom de la catégorie</label>
+                      <label className="block text-sm font-medium text-stone-700 mb-2">Category name</label>
                       <input
                         type="text"
                         value={newCategoryName}
                         onChange={(e) => setNewCategoryName(e.target.value)}
                         className="w-full px-5 py-4 border border-stone-300 rounded-2xl focus:border-stone-900 outline-none"
-                        placeholder="Ex: Coffres-forts"
+                        placeholder="e.g. Phone Cases"
                         required
                         disabled={isCreating}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-2">Description (optionnel)</label>
+                      <label className="block text-sm font-medium text-stone-700 mb-2">Description (optional)</label>
                       <textarea
                         value={newCategoryDescription}
                         onChange={(e) => setNewCategoryDescription(e.target.value)}
                         className="w-full px-5 py-4 border border-stone-300 rounded-2xl focus:border-stone-900 outline-none h-24 resize-y"
-                        placeholder="Description de la catégorie..."
+                        placeholder="Category description..."
                         disabled={isCreating}
                       />
                     </div>
 
                     <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-3">Image de la catégorie</label>
+                      <label className="block text-sm font-medium text-stone-700 mb-3">Category image</label>
                       <div className="border-2 border-dashed border-stone-300 rounded-2xl p-8 text-center hover:border-stone-400 transition">
                         <input
                           type="file"
@@ -285,8 +283,8 @@ export default function AdminCategories() {
                         />
                         <label htmlFor="category-image" className="cursor-pointer flex flex-col items-center">
                           <Upload size={40} className="text-stone-400 mb-3" />
-                          <span className="text-sm text-stone-600">Cliquez pour ajouter une image</span>
-                          <span className="text-xs text-stone-500 mt-1">(Recommandé: 800x600px)</span>
+                          <span className="text-sm text-stone-600">Click to add an image</span>
+                          <span className="text-xs text-stone-500 mt-1">(Recommended: 800x600px)</span>
                         </label>
                       </div>
 
@@ -314,10 +312,10 @@ export default function AdminCategories() {
                         {isCreating ? (
                           <>
                             <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                            Création en cours...
+                            Creating...
                           </>
                         ) : (
-                          "Créer la catégorie"
+                          "Create category"
                         )}
                       </button>
 
@@ -327,7 +325,7 @@ export default function AdminCategories() {
                         className="flex-1 py-4 border border-stone-300 rounded-2xl font-medium hover:bg-stone-100 transition"
                         disabled={isCreating}
                       >
-                        Annuler
+                        Cancel
                       </button>
                     </div>
                   </form>

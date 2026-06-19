@@ -17,7 +17,7 @@ export default function AdminGallery() {
       const res = await axios.get(`${API_BASE_URL}/gallery`);
       setImages(res.data);
     } catch (err) {
-      toast.error("Erreur de chargement");
+      toast.error("Failed to load gallery");
     } finally {
       setLoading(false);
     }
@@ -41,35 +41,35 @@ export default function AdminGallery() {
       await axios.post(`${API_BASE_URL}/gallery`, formData, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-      toast.success("Images ajoutées avec succès");
+      toast.success("Images added successfully");
       fetchGallery();
     } catch (err) {
-      toast.error("Erreur lors de l'upload");
+      toast.error("Upload failed");
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Supprimer cette image ?")) return;
+    if (!confirm("Delete this image?")) return;
     try {
       await axios.delete(`${API_BASE_URL}/gallery/${id}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-      toast.success("Image supprimée");
+      toast.success("Image deleted");
       fetchGallery();
     } catch (err) {
-      toast.error("Erreur lors de la suppression");
+      toast.error("Failed to delete");
     }
   };
 
   return (
     <div className="p-8">
       <div className="flex justify-between items-center mb-10">
-        <h1 className="text-4xl font-light">Galerie Admin</h1>
+        <h1 className="text-4xl font-light">Gallery</h1>
         <label className="cursor-pointer bg-black text-white px-6 py-4 rounded-2xl flex items-center gap-3 hover:bg-amber-800">
           <Upload size={24} />
-          <span>Ajouter des images</span>
+          <span>Add images</span>
           <input
             type="file"
             multiple
@@ -80,7 +80,7 @@ export default function AdminGallery() {
         </label>
       </div>
 
-      {uploading && <p className="text-amber-700 mb-4">Upload en cours...</p>}
+      {uploading && <p className="text-amber-700 mb-4">Uploading...</p>}
 
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {images.map((img) => (

@@ -20,7 +20,7 @@ export default function AdminRepairRequests() {
       });
       setRequests(res.data);
     } catch (err) {
-      toast.error("Erreur de chargement");
+      toast.error("Failed to load");
     } finally {
       setLoading(false);
     }
@@ -31,28 +31,28 @@ export default function AdminRepairRequests() {
   }, []);
 
   const handleDelete = async (id) => {
-    if (!confirm("Supprimer cette demande de réparation ?")) return;
+    if (!confirm("Delete this repair request?")) return;
     try {
       await axios.delete(`${API_BASE_URL}/repair-requests/${id}`, {
         headers: { Authorization: `Bearer ${getToken()}` },
       });
-      toast.success("Demande supprimée");
+      toast.success("Request deleted");
       fetchRequests();
     } catch (err) {
-      toast.error("Erreur lors de la suppression");
+      toast.error("Failed to delete");
     }
   };
 
-  if (loading) return <div className="p-8">Chargement...</div>;
+  if (loading) return <div className="p-8">Loading...</div>;
 
   return (
     <div className="p-8">
-      <h1 className="text-4xl font-light mb-10">Demandes de Réparation</h1>
+      <h1 className="text-4xl font-light mb-10">Repair Requests</h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {requests.map((req) => (
-          <div 
-            key={req._id} 
+          <div
+            key={req._id}
             className="bg-white border border-stone-200 rounded-3xl p-6 hover:shadow-xl transition"
           >
             <div className="flex justify-between items-start">
@@ -77,10 +77,10 @@ export default function AdminRepairRequests() {
             </div>
 
             <div className="mt-4 text-stone-600">
-              <p><strong>Email :</strong> {req.email}</p>
-              <p><strong>Tél :</strong> {req.phone}</p>
+              <p><strong>Email:</strong> {req.email}</p>
+              <p><strong>Phone:</strong> {req.phone}</p>
               {req.preferredDate && (
-                <p><strong>Date souhaitée :</strong> {new Date(req.preferredDate).toLocaleDateString('fr-FR')}</p>
+                <p><strong>Preferred date:</strong> {new Date(req.preferredDate).toLocaleDateString('en-GB')}</p>
               )}
             </div>
 
@@ -103,7 +103,7 @@ export default function AdminRepairRequests() {
             )}
 
             <p className="text-xs text-stone-500 mt-6">
-              {new Date(req.createdAt).toLocaleDateString('fr-FR', {
+              {new Date(req.createdAt).toLocaleDateString('en-GB', {
                 day: 'numeric',
                 month: 'long',
                 year: 'numeric',
@@ -117,7 +117,7 @@ export default function AdminRepairRequests() {
 
       {requests.length === 0 && (
         <p className="text-center text-stone-500 py-20 text-xl">
-          Aucune demande de réparation pour le moment.
+          No repair requests yet.
         </p>
       )}
 
@@ -126,19 +126,19 @@ export default function AdminRepairRequests() {
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-3xl max-w-2xl w-full p-8 max-h-[90vh] overflow-y-auto">
             <h2 className="text-2xl font-semibold mb-6">{selectedRequest.itemName}</h2>
-            
+
             <div className="space-y-4 text-stone-700">
-              <p><strong>Client :</strong> {selectedRequest.name}</p>
-              <p><strong>Email :</strong> {selectedRequest.email}</p>
-              <p><strong>Téléphone :</strong> {selectedRequest.phone}</p>
+              <p><strong>Customer:</strong> {selectedRequest.name}</p>
+              <p><strong>Email:</strong> {selectedRequest.email}</p>
+              <p><strong>Phone:</strong> {selectedRequest.phone}</p>
               {selectedRequest.preferredDate && (
-                <p><strong>Date préférée :</strong> {new Date(selectedRequest.preferredDate).toLocaleDateString('fr-FR')}</p>
+                <p><strong>Preferred date:</strong> {new Date(selectedRequest.preferredDate).toLocaleDateString('en-GB')}</p>
               )}
-              <p><strong>Date de demande :</strong> {new Date(selectedRequest.createdAt).toLocaleString('fr-FR')}</p>
+              <p><strong>Request date:</strong> {new Date(selectedRequest.createdAt).toLocaleString('en-GB')}</p>
             </div>
 
             <div className="mt-8 border-t pt-6">
-              <h3 className="font-medium mb-3">Description du problème :</h3>
+              <h3 className="font-medium mb-3">Issue description:</h3>
               <p className="whitespace-pre-wrap leading-relaxed text-stone-700">
                 {selectedRequest.issueDescription}
               </p>
@@ -146,7 +146,7 @@ export default function AdminRepairRequests() {
 
             {selectedRequest.images && selectedRequest.images.length > 0 && (
               <div className="mt-8">
-                <h3 className="font-medium mb-4">Photos jointes :</h3>
+                <h3 className="font-medium mb-4">Attached photos:</h3>
                 <div className="grid grid-cols-3 gap-4">
                   {selectedRequest.images.map((img, i) => (
                     <img
@@ -165,7 +165,7 @@ export default function AdminRepairRequests() {
               onClick={() => setSelectedRequest(null)}
               className="mt-10 w-full py-4 bg-stone-900 text-white rounded-2xl hover:bg-black transition"
             >
-              Fermer
+              Close
             </button>
           </div>
         </div>

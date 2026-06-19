@@ -10,7 +10,6 @@ const ADMIN_SECTIONS = [
   { path: "/admin/products", title: "Manage Phones", description: "Create, edit and delete phone listings" },
   { path: "/admin/accessories", title: "Manage Accessories", description: "Create, edit and delete accessories" },
   { path: "/admin/cases", title: "Manage Cases", description: "Create, edit and delete phone cases" },
-  { path: "/admin/gallery", title: "Manage Gallery", description: "Manage your gallery images" },
   { path: "/admin/sell-requests", title: "Sell Requests", description: "Manage user sell requests" },
   { path: "/admin/contacts", title: "Contact Messages", description: "Manage user contact messages" },
   { path: "/admin/repair-requests", title: "Repair Requests", description: "Manage user repair requests" },
@@ -20,7 +19,6 @@ const SUPERADMIN_EXTRA = [
   { path: "/admin/users", title: "Manage Users", description: "Create, edit and delete admin accounts" },
   { path: "/admin/phone-brands", title: "Phone Brands", description: "Add and manage phone brands" },
   { path: "/admin/accessories-categories", title: "Accessories Categories", description: "Manage accessory categories" },
-  { path: "/admin/categories", title: "Product Categories", description: "Add and edit product categories" },
   { path: "/admin/delivery-areas", title: "Delivery Areas", description: "Add and update delivery prices by wilaya" },
 ];
 

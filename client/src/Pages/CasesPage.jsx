@@ -1,180 +1,282 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../../api";
+import { toast } from "react-toastify";
+
+const GRADIENTS = [
+  ["#8B5CF6", "#6C2BD9"],
+  ["#EC4899", "#BE185D"],
+  ["#22D3EE", "#0891B2"],
+  ["#F59E0B", "#D97706"],
+  ["#10B981", "#059669"],
+  ["#6366F1", "#4338CA"],
+];
+
+function CaseCard({ item, index, onClick }) {
+  const cardRef = useRef(null);
+  const [g1, g2] = GRADIENTS[index % GRADIENTS.length];
+
+  const onMouseMove = (e) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const rx = ((e.clientY - rect.top) / rect.height - 0.5) * -10;
+    const ry = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
+    card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    card.style.setProperty("--mx", `${((e.clientX - rect.left) / rect.width) * 100}%`);
+    card.style.setProperty("--my", `${((e.clientY - rect.top) / rect.height) * 100}%`);
+  };
+
+  const onMouseLeave = () => {
+    const card = cardRef.current;
+    if (!card) return;
+    card.style.transform = "perspective(800px) rotateX(0) rotateY(0)";
+  };
+
+  return (
+    <div
+      ref={cardRef}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      style={{
+        position: "relative", borderRadius: 22, overflow: "hidden",
+        border: "1px solid rgba(255,255,255,.08)",
+        background: "linear-gradient(170deg,rgba(255,255,255,.055),rgba(255,255,255,.015))",
+        backdropFilter: "blur(8px)",
+        transition: "box-shadow .3s",
+        transformStyle: "preserve-3d",
+        animation: "fadeUp .55s both",
+        animationDelay: `${index * 0.05}s`,
+        "--mx": "50%", "--my": "50%",
+      }}
+      onMouseEnter={e => e.currentTarget.style.boxShadow = "0 34px 60px -22px rgba(108,43,217,.6)"}
+    >
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(220px circle at var(--mx) var(--my),rgba(139,92,246,.2),transparent 60%)", pointerEvents: "none", zIndex: 3 }} />
+
+      <div onClick={onClick} style={{ position: "relative", height: 240, display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(circle at 50% 30%,rgba(139,92,246,.16),transparent 60%)", overflow: "hidden", cursor: "pointer" }}>
+        {item.images?.[0]?.url ? (
+          <img src={item.images[0].url} alt={item.name} style={{ maxWidth: 160, maxHeight: 220, objectFit: "contain", transform: "translateZ(30px)", filter: "drop-shadow(0 20px 40px rgba(0,0,0,.7))" }} />
+        ) : (
+          <div style={{ width: 80, height: 160, borderRadius: 18, background: `linear-gradient(165deg,${g1},${g2})`, transform: "translateZ(30px)", position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(115deg,rgba(255,255,255,.25),transparent 40%)" }} />
+          </div>
+        )}
+      </div>
+
+      <div style={{ position: "relative", zIndex: 4, padding: 18 }}>
+        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#94A3B8", margin: "0 0 4px" }}>
+          {item.brand?.name || ""}
+        </p>
+        <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 17, margin: "0 0 10px", lineHeight: 1.3 }}>
+          {item.name}
+        </h3>
+
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+          {item.material && (
+            <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 10.5, padding: "3px 8px", borderRadius: 6, background: "rgba(139,92,246,.12)", border: "1px solid rgba(139,92,246,.25)", color: "#c4b5fd" }}>
+              {item.material}
+            </span>
+          )}
+          {item.color && (
+            <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 10.5, padding: "3px 8px", borderRadius: 6, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", color: "#94A3B8" }}>
+              {item.color}
+            </span>
+          )}
+          {item.compatibleModels?.length > 0 && (
+            <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 10.5, padding: "3px 8px", borderRadius: 6, background: "rgba(34,211,238,.08)", border: "1px solid rgba(34,211,238,.2)", color: "#67e8f9" }}>
+              {item.compatibleModels.length} model{item.compatibleModels.length > 1 ? "s" : ""}
+            </span>
+          )}
+        </div>
+
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18 }}>
+            {(item.price || 0).toLocaleString()} DA
+          </span>
+          <button
+            onClick={onClick}
+            style={{ fontFamily: "'Manrope'", fontWeight: 600, fontSize: 13, padding: "9px 14px", borderRadius: 11, border: "1px solid rgba(139,92,246,.4)", background: "rgba(139,92,246,.14)", color: "#e9deff", cursor: "pointer", transition: "all .25s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#6C2BD9"; e.currentTarget.style.color = "#fff"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(139,92,246,.14)"; e.currentTarget.style.color = "#e9deff"; }}
+          >
+            View Details
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FilterChips({ label, options, value, onChange }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+      <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 10.5, color: "#64748B", letterSpacing: ".06em", flexShrink: 0 }}>
+        {label}
+      </span>
+      {options.map(opt => {
+        const active = value === opt;
+        return (
+          <button
+            key={opt}
+            onClick={() => onChange(active ? "All" : opt)}
+            style={{
+              fontFamily: "'Manrope'", fontWeight: 600, fontSize: 13,
+              padding: "6px 13px", borderRadius: 10, cursor: "pointer", transition: "all .2s",
+              color: active ? "#fff" : "#94A3B8",
+              background: active ? "rgba(139,92,246,.35)" : "rgba(255,255,255,.04)",
+              border: `1px solid ${active ? "rgba(139,92,246,.6)" : "rgba(255,255,255,.07)"}`,
+            }}
+          >
+            {opt}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
 
 export default function CasesPage() {
-  const [cases, setCases] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
+  const [cases, setCases] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [search, setSearch] = useState("");
+  const [brand, setBrand] = useState("All");
+  const [material, setMaterial] = useState("All");
+  const [color, setColor] = useState("All");
+  const [filtersOpen, setFiltersOpen] = useState(true);
+
   useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/cases`)
-      .then((r) => setCases(r.data))
-      .catch(() => {})
+    const b = searchParams.get("brand");
+    if (b) setBrand(b);
+  }, [searchParams]);
+
+  useEffect(() => {
+    axios.get(`${API_BASE_URL}/cases`)
+      .then(r => setCases(r.data || []))
+      .catch(() => toast.error("Failed to load cases"))
       .finally(() => setLoading(false));
   }, []);
 
-  const TYPE_COLORS = {
-    "Silicone": ["#8B5CF6", "#4C1D95"],
-    "Leather": ["#F59E0B", "#92400E"],
-    "Clear": ["#22D3EE", "#0E7490"],
-    "Rugged": ["#10B981", "#065F46"],
-    "Wallet": ["#EC4899", "#9D174D"],
+  const brands    = useMemo(() => ["All", ...new Set(cases.map(c => c.brand?.name).filter(Boolean))], [cases]);
+  const materials = useMemo(() => ["All", ...new Set(cases.map(c => c.material).filter(Boolean))], [cases]);
+  const colors    = useMemo(() => ["All", ...new Set(cases.map(c => c.color).filter(Boolean))], [cases]);
+
+  const filtered = useMemo(() => {
+    return cases.filter(c => {
+      if (brand !== "All" && c.brand?.name !== brand) return false;
+      if (material !== "All" && c.material !== material) return false;
+      if (color !== "All" && c.color !== color) return false;
+      if (search) {
+        const q = search.toLowerCase();
+        const matchName = c.name.toLowerCase().includes(q);
+        const matchBrand = (c.brand?.name || "").toLowerCase().includes(q);
+        const matchModels = (c.compatibleModels || []).some(m => m.toLowerCase().includes(q));
+        if (!matchName && !matchBrand && !matchModels) return false;
+      }
+      return true;
+    });
+  }, [cases, brand, material, color, search]);
+
+  const handleBrandChange = (val) => {
+    setBrand(val);
+    if (val === "All") navigate("/cases", { replace: true });
+    else navigate(`/cases?brand=${encodeURIComponent(val)}`, { replace: true });
   };
 
-  const getColors = (type) => TYPE_COLORS[type] || ["#6C2BD9", "#4C1D95"];
+  const clearAll = () => {
+    setBrand("All");
+    setMaterial("All");
+    setColor("All");
+    setSearch("");
+    navigate("/cases", { replace: true });
+  };
+
+  const hasActiveFilters = brand !== "All" || material !== "All" || color !== "All" || search;
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: "'Space Grotesk'", fontSize: 22, color: "#8B5CF6", animation: "glowPulse 1.5s infinite" }}>Loading cases…</p>
+      </div>
+    );
+  }
 
   return (
-    <main style={{ minHeight: "100vh", position: "relative", zIndex: 2 }}>
-      {/* Hero */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 26px 40px" }}>
-        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 12.5, letterSpacing: ".12em", color: "#22D3EE", margin: "0 0 14px" }}>
-          // CASES & COVERS
+    <div style={{ animation: "fadeIn .5s", maxWidth: 1280, margin: "0 auto", padding: "50px 26px 80px" }}>
+      {/* Header */}
+      <div style={{ animation: "fadeUp .6s both", marginBottom: 30 }}>
+        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 12.5, letterSpacing: ".12em", color: "#22D3EE", margin: "0 0 10px" }}>
+          // {filtered.length} CASES
         </p>
-        <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(36px,5vw,64px)", letterSpacing: "-.03em", margin: "0 0 18px", lineHeight: 1.1 }}>
+        <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(34px,5vw,58px)", letterSpacing: "-.025em", margin: 0 }}>
           Phone Cases
         </h1>
-        <p style={{ fontFamily: "'Manrope'", fontSize: 17, color: "#94A3B8", margin: 0, maxWidth: 520, lineHeight: 1.65 }}>
-          Protect your device in style. Premium cases for every phone model — silicone, leather, clear, rugged, and more.
-        </p>
-      </section>
+      </div>
 
-      {/* Case Types */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 26px 40px" }}>
-        <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: "0 0 24px" }}>
-          Shop by Type
-        </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 16 }}>
-          {Object.entries(TYPE_COLORS).map(([type, [g1, g2]]) => (
-            <div
-              key={type}
-              onClick={() => navigate(`/products?caseType=${encodeURIComponent(type)}`)}
-              style={{
-                position: "relative", borderRadius: 20, cursor: "pointer",
-                border: "1px solid rgba(255,255,255,.08)",
-                background: "linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.01))",
-                padding: "28px 24px", overflow: "hidden",
-                transition: "transform .25s, border-color .25s",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.2)"; }}
-              onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"; }}
-            >
-              <div style={{ position: "absolute", inset: 0, overflow: "hidden", borderRadius: 20 }}>
-                <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 130%,${g1},transparent 65%)`, opacity: 0.45 }} />
-                <div style={{ position: "absolute", top: -20, right: -20, width: 100, height: 100, borderRadius: "50%", background: `linear-gradient(135deg,${g1},${g2})`, filter: "blur(28px)", opacity: 0.5 }} />
-              </div>
-              <div style={{ position: "relative", zIndex: 1 }}>
-                <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "rgba(255,255,255,.5)", display: "block", marginBottom: 10 }}>Type</span>
-                <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 20, margin: "0 0 8px" }}>{type}</h3>
-                <span style={{ fontFamily: "'Manrope'", fontSize: 13, color: "rgba(255,255,255,.55)" }}>Browse →</span>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Cases Grid */}
-      {!loading && cases.length > 0 && (
-        <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 26px 40px" }}>
-          <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: "0 0 24px" }}>
-            Featured Cases
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 20 }}>
-            {cases.slice(0, 8).map((item) => {
-              const [g1] = getColors(item.type);
-              return (
-                <div
-                  key={item._id}
-                  onClick={() => navigate(`/products?caseType=${encodeURIComponent(item.type || "")}`)}
-                  style={{
-                    borderRadius: 20, cursor: "pointer",
-                    border: "1px solid rgba(255,255,255,.08)",
-                    background: "rgba(255,255,255,.03)",
-                    overflow: "hidden",
-                    transition: "transform .25s, border-color .25s",
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.18)"; }}
-                  onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"; }}
-                >
-                  {item.images?.[0]?.url ? (
-                    <div style={{ height: 200, background: `linear-gradient(135deg,rgba(255,255,255,.04),rgba(255,255,255,.01))`, display: "flex", alignItems: "center", justifyContent: "center", overflow: "hidden" }}>
-                      <img src={item.images[0].url} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                    </div>
-                  ) : (
-                    <div style={{ height: 200, background: `linear-gradient(135deg,${g1}22,rgba(255,255,255,.02))`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 48 }}>
-                      📱
-                    </div>
-                  )}
-                  <div style={{ padding: "18px 20px" }}>
-                    <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#22D3EE", display: "block", marginBottom: 6 }}>
-                      {item.type || "Case"}
-                    </span>
-                    <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, margin: "0 0 8px", lineHeight: 1.3 }}>{item.name}</h3>
-                    {item.price && (
-                      <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18, color: "#22D3EE", margin: 0 }}>
-                        {item.price.toLocaleString()} DA
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
-
-      {/* Loading skeletons */}
-      {loading && (
-        <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 26px 40px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(240px,1fr))", gap: 20 }}>
-            {[...Array(4)].map((_, i) => (
-              <div key={i} style={{ height: 300, borderRadius: 20, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.06)", animation: "glowPulse 1.8s infinite" }} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* CTA */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 26px 80px" }}>
-        <div
-          style={{
-            background: "linear-gradient(135deg,rgba(236,72,153,.1),rgba(108,43,217,.08))",
-            border: "1px solid rgba(236,72,153,.2)",
-            borderRadius: 28,
-            padding: "48px 40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 30,
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 26, margin: "0 0 10px" }}>
-              Can't find your model?
-            </h3>
-            <p style={{ fontFamily: "'Manrope'", fontSize: 15, color: "#94A3B8", margin: 0 }}>
-              Contact us and we'll source the right case for you.
-            </p>
+      {/* Sticky filter bar */}
+      <div style={{ position: "sticky", top: 72, zIndex: 40, background: "rgba(5,8,22,.85)", backdropFilter: "blur(16px)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 18, padding: 14, marginBottom: 28 }}>
+        <div style={{ display: "flex", gap: 10, marginBottom: filtersOpen ? 12 : 0 }}>
+          <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 11, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 13, padding: "10px 15px" }}>
+            <span style={{ color: "#94A3B8", fontSize: 17 }}>⌕</span>
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search cases, brands, compatible models…"
+              style={{ flex: 1, background: "none", border: "none", outline: "none", color: "#fff", fontFamily: "'Manrope'", fontSize: 15 }}
+            />
+            {search && (
+              <button onClick={() => setSearch("")} style={{ background: "none", border: "none", color: "#64748B", cursor: "pointer", fontSize: 16 }}>✕</button>
+            )}
           </div>
           <button
-            onClick={() => navigate("/contact")}
-            style={{
-              fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16,
-              padding: "16px 36px", borderRadius: 16, border: "none",
-              background: "linear-gradient(135deg,#EC4899,#9D174D)", color: "#fff",
-              cursor: "pointer", boxShadow: "0 12px 32px -8px rgba(236,72,153,.7)",
-              transition: "transform .2s,box-shadow .2s", whiteSpace: "nowrap",
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 18px 40px -8px rgba(236,72,153,.9)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 12px 32px -8px rgba(236,72,153,.7)"; }}
+            onClick={() => setFiltersOpen(v => !v)}
+            style={{ padding: "10px 16px", borderRadius: 13, border: "1px solid rgba(255,255,255,.08)", background: filtersOpen ? "rgba(139,92,246,.2)" : "rgba(255,255,255,.04)", color: filtersOpen ? "#c4b5fd" : "#94A3B8", fontFamily: "'Manrope'", fontWeight: 600, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", transition: "all .2s" }}
           >
-            Contact Us
+            {filtersOpen ? "Hide Filters" : "Show Filters"}
+          </button>
+          {hasActiveFilters && (
+            <button
+              onClick={clearAll}
+              style={{ padding: "10px 16px", borderRadius: 13, border: "1px solid rgba(239,68,68,.3)", background: "rgba(239,68,68,.1)", color: "#fca5a5", fontFamily: "'Manrope'", fontWeight: 600, fontSize: 13, cursor: "pointer", whiteSpace: "nowrap", transition: "all .2s" }}
+            >
+              Clear All
+            </button>
+          )}
+        </div>
+
+        {filtersOpen && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, paddingTop: 4, borderTop: "1px solid rgba(255,255,255,.06)" }}>
+            <FilterChips label="BRAND"    options={brands}    value={brand}    onChange={handleBrandChange} />
+            {materials.length > 1 && <FilterChips label="MATERIAL" options={materials} value={material} onChange={setMaterial} />}
+            {colors.length > 1    && <FilterChips label="COLOR"    options={colors}    value={color}    onChange={setColor} />}
+          </div>
+        )}
+      </div>
+
+      {/* No results */}
+      {filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: "80px 20px", color: "#94A3B8" }}>
+          <p style={{ fontFamily: "'Space Grotesk'", fontSize: 22, color: "#fff", margin: "0 0 8px" }}>No cases match</p>
+          <p style={{ margin: 0 }}>Try adjusting your filters or search term.</p>
+          <button
+            onClick={clearAll}
+            style={{ marginTop: 20, padding: "10px 24px", borderRadius: 12, border: "1px solid rgba(139,92,246,.4)", background: "rgba(139,92,246,.15)", color: "#c4b5fd", fontFamily: "'Manrope'", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+          >
+            Clear Filters
           </button>
         </div>
-      </section>
-    </main>
+      )}
+
+      {/* Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(258px,1fr))", gap: 18 }}>
+        {filtered.map((c, i) => (
+          <CaseCard key={c._id} item={c} index={i} onClick={() => navigate(`/case/${c._id}`)} />
+        ))}
+      </div>
+    </div>
   );
 }

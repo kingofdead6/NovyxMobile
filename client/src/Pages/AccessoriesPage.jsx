@@ -13,7 +13,7 @@ const GRADIENTS = [
   ["#6366F1", "#4338CA"],
 ];
 
-function AccessoryCard({ item, index }) {
+function AccessoryCard({ item, index, onClick }) {
   const cardRef = useRef(null);
   const [g1, g2] = GRADIENTS[index % GRADIENTS.length];
 
@@ -34,20 +34,6 @@ function AccessoryCard({ item, index }) {
     card.style.transform = "perspective(800px) rotateX(0) rotateY(0)";
   };
 
-  const addToCart = (e) => {
-    e.stopPropagation();
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const existing = cart.findIndex(c => c._id === item._id);
-    if (existing >= 0) {
-      cart[existing].quantity = (cart[existing].quantity || 1) + 1;
-    } else {
-      cart.push({ _id: item._id, name: item.name, price: item.price, image: item.images?.[0]?.url, quantity: 1 });
-    }
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new Event("cartUpdated"));
-    toast.success(`${item.name} added to cart`);
-  };
-
   return (
     <div
       ref={cardRef}
@@ -66,52 +52,33 @@ function AccessoryCard({ item, index }) {
       }}
       onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 34px 60px -22px rgba(34,211,238,.4)")}
     >
-      {/* Mouse-follow glow */}
       <div style={{ position: "absolute", inset: 0, background: "radial-gradient(220px circle at var(--mx) var(--my),rgba(34,211,238,.15),transparent 60%)", pointerEvents: "none", zIndex: 3 }} />
 
-      {/* Image */}
-      <div style={{ position: "relative", height: 220, display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(circle at 50% 30%,rgba(34,211,238,.1),transparent 60%)", overflow: "hidden" }}>
+      <div onClick={onClick} style={{ position: "relative", height: 220, display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(circle at 50% 30%,rgba(34,211,238,.1),transparent 60%)", overflow: "hidden", cursor: "pointer" }}>
         {item.images?.[0]?.url ? (
-          <img
-            src={item.images[0].url}
-            alt={item.name}
-            style={{ width: "100%", height: "100%", objectFit: "cover", transform: "translateZ(20px)" }}
-          />
+          <img src={item.images[0].url} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover", transform: "translateZ(20px)" }} />
         ) : (
-          <div style={{ width: 100, height: 100, borderRadius: 20, background: `linear-gradient(135deg,${g1},${g2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, transform: "translateZ(20px)" }}>
-            📦
-          </div>
+          <div style={{ width: 100, height: 100, borderRadius: 20, background: `linear-gradient(135deg,${g1},${g2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, transform: "translateZ(20px)" }}>📦</div>
         )}
       </div>
 
-      {/* Info */}
       <div style={{ position: "relative", zIndex: 4, padding: 18 }}>
         <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#22D3EE", margin: "0 0 5px", letterSpacing: ".04em" }}>
           {item.category?.name?.toUpperCase() || "ACCESSORY"}
         </p>
-        <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 17, margin: "0 0 4px", lineHeight: 1.25 }}>
-          {item.name}
-        </h3>
+        <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 17, margin: "0 0 4px", lineHeight: 1.25 }}>{item.name}</h3>
         {item.brand && (
-          <p style={{ fontFamily: "'Manrope'", fontSize: 12.5, color: "#64748B", margin: "0 0 14px" }}>{item.brand}</p>
+          <p style={{ fontFamily: "'Manrope'", fontSize: 12.5, color: "#64748B", margin: "0 0 12px" }}>{item.brand}</p>
         )}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-          <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18 }}>
-            {(item.price || 0).toLocaleString()} DA
-          </span>
+          <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18 }}>{(item.price || 0).toLocaleString()} DA</span>
           <button
-            onClick={addToCart}
-            style={{
-              fontFamily: "'Manrope'", fontWeight: 600, fontSize: 13,
-              padding: "9px 14px", borderRadius: 11,
-              border: "1px solid rgba(34,211,238,.35)",
-              background: "rgba(34,211,238,.1)", color: "#67e8f9",
-              cursor: "pointer", transition: "all .25s",
-            }}
+            onClick={onClick}
+            style={{ fontFamily: "'Manrope'", fontWeight: 600, fontSize: 13, padding: "9px 14px", borderRadius: 11, border: "1px solid rgba(34,211,238,.35)", background: "rgba(34,211,238,.1)", color: "#67e8f9", cursor: "pointer", transition: "all .25s" }}
             onMouseEnter={e => { e.currentTarget.style.background = "#0891b2"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "#0891b2"; }}
             onMouseLeave={e => { e.currentTarget.style.background = "rgba(34,211,238,.1)"; e.currentTarget.style.color = "#67e8f9"; e.currentTarget.style.borderColor = "rgba(34,211,238,.35)"; }}
           >
-            Add to Cart
+            View Details
           </button>
         </div>
       </div>
@@ -263,7 +230,7 @@ export default function AccessoriesPage() {
       {/* Grid */}
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(258px,1fr))", gap: 18 }}>
         {filtered.map((item, i) => (
-          <AccessoryCard key={item._id} item={item} index={i} />
+          <AccessoryCard key={item._id} item={item} index={i} onClick={() => navigate(`/accessory/${item._id}`)} />
         ))}
       </div>
     </div>

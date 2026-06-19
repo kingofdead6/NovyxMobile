@@ -35,6 +35,8 @@ import AdminPhoneBrands from "./Components/Admin/AdminPhoneBrands.jsx";
 import AdminAccessoriesCategories from "./Components/Admin/AdminAccessoriesCategories.jsx";
 import AdminAccessories from "./Components/Admin/AdminAccessories.jsx";
 import AdminCases from "./Components/Admin/AdminCases.jsx";
+import AccessoryDetailsPage from "./Components/Products/AccessoryDetails.jsx";
+import CaseDetailsPage from "./Components/Products/CaseDetails.jsx";
 
 function App() {
   return (
@@ -64,6 +66,8 @@ function App() {
             <Route path="/repair" element={<RepairPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
+            <Route path="/accessory/:id" element={<AccessoryDetailsPage />} />
+            <Route path="/case/:id" element={<CaseDetailsPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<FinalizeOrder />} />
             <Route path="/login" element={<Login />} />

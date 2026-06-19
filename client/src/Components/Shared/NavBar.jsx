@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
 
@@ -91,40 +91,38 @@ export default function Navbar() {
   return (
     <>
       {/* ── HEADER ── */}
-      <header style={{
-        position: "sticky", top: 0, zIndex: 90,
-        backdropFilter: "blur(22px) saturate(160%)",
-        WebkitBackdropFilter: "blur(22px) saturate(160%)",
-        background: scrolled
-          ? "linear-gradient(180deg,rgba(5,8,22,.95),rgba(5,8,22,.8))"
-          : "linear-gradient(180deg,rgba(5,8,22,.82),rgba(5,8,22,.45))",
-        borderBottom: "1px solid rgba(255,255,255,.08)",
-        transition: "background .3s",
-      }}>
-        <div style={{ maxWidth: 1280, margin: "0 auto", padding: "14px 26px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24 }}>
+      <header
+        className={`sticky top-0 z-[90] backdrop-blur-[22px] saturate-150 border-b border-white/[0.08] transition-all duration-300 ${
+          scrolled
+            ? "bg-[linear-gradient(180deg,rgba(5,8,22,.95),rgba(5,8,22,.8))]"
+            : "bg-[linear-gradient(180deg,rgba(5,8,22,.82),rgba(5,8,22,.45))]"
+        }`}
+      >
+        <div className="max-w-[1280px] mx-auto px-5 sm:px-[26px] py-3.5 flex items-center justify-between gap-6">
           {/* Logo */}
-          <Link to="/" style={{ display: "flex", alignItems: "center", gap: 11, textDecoration: "none" }}>
-            <span style={{ position: "relative", width: 34, height: 34, borderRadius: 11, background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 8px 24px -6px rgba(108,43,217,.8)", flexShrink: 0 }}>
-              <span style={{ width: 13, height: 13, borderRadius: 4, background: "#fff", transform: "rotate(45deg)", boxShadow: "0 0 12px rgba(255,255,255,.7)", display: "block" }} />
+          <Link to="/" className="flex items-center gap-[11px] no-underline shrink-0">
+            <span className="relative w-[34px] h-[34px] rounded-[11px] bg-gradient-to-br from-[#8B5CF6] to-[#6C2BD9] flex items-center justify-center shadow-[0_8px_24px_-6px_rgba(108,43,217,.8)]">
+              <span className="w-[13px] h-[13px] rounded-[4px] bg-white rotate-45 shadow-[0_0_12px_rgba(255,255,255,.7)] block" />
             </span>
-            <span style={{ fontFamily: "'Space Grotesk',sans-serif", fontWeight: 700, fontSize: 20, letterSpacing: "-.02em", color: "#fff" }}>
-              NOVYX<span style={{ color: "#22D3EE" }}>.</span>
+            <span className="font-['Space_Grotesk'] font-bold text-xl tracking-[-0.02em] text-white">
+              NOVYX<span className="text-[#22D3EE]">.</span>
             </span>
           </Link>
 
           {/* Desktop Nav */}
-          <nav style={{ display: "flex", alignItems: "center", gap: 6 }} className="hidden md:flex">
+          <nav className="hidden md:flex items-center gap-1.5">
             {navItems.map((n) => {
               const active = n.to === "/" ? location.pathname === "/" : location.pathname.startsWith(n.to);
               return (
-                <Link key={n.to} to={n.to} style={{
-                  fontFamily: "'Manrope'", fontWeight: 600, fontSize: 14.5,
-                  color: active ? "#fff" : "rgba(255,255,255,.65)",
-                  background: active ? "rgba(139,92,246,.2)" : "none",
-                  border: `1px solid ${active ? "rgba(139,92,246,.5)" : "transparent"}`,
-                  padding: "9px 16px", borderRadius: 11, cursor: "pointer",
-                  transition: "all .25s", textDecoration: "none",
-                }}>
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  className={`font-['Manrope'] font-semibold text-[14.5px] px-4 py-[9px] rounded-[11px] border transition-all duration-[250ms] no-underline ${
+                    active
+                      ? "text-white bg-[rgba(139,92,246,.2)] border-[rgba(139,92,246,.5)]"
+                      : "text-white/65 bg-transparent border-transparent hover:text-white hover:bg-white/[0.07] hover:border-white/20"
+                  }`}
+                >
                   {n.label}
                 </Link>
               );
@@ -132,44 +130,31 @@ export default function Navbar() {
           </nav>
 
           {/* Right */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div className="flex items-center gap-2.5">
             {!isAdmin && (
               <button
                 onClick={() => setCartOpen(true)}
-                style={{
-                  position: "relative", display: "flex", alignItems: "center", gap: 9,
-                  fontFamily: "'Manrope'", fontWeight: 600, fontSize: 14, color: "#fff",
-                  background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)",
-                  padding: "9px 15px 9px 13px", borderRadius: 12, cursor: "pointer",
-                  transition: "all .25s",
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = "rgba(139,92,246,.18)"; e.currentTarget.style.borderColor = "rgba(139,92,246,.5)"; }}
-                onMouseLeave={e => { e.currentTarget.style.background = "rgba(255,255,255,.05)"; e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"; }}
+                className="relative flex items-center gap-[9px] font-['Manrope'] font-semibold text-sm text-white bg-white/[0.05] border border-white/[0.08] px-[15px] py-[9px] rounded-[12px] cursor-pointer transition-all duration-[250ms] hover:bg-[rgba(139,92,246,.18)] hover:border-[rgba(139,92,246,.5)]"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
                   <line x1="3" y1="6" x2="21" y2="6"/>
                   <path d="M16 10a4 4 0 01-8 0"/>
                 </svg>
-                <span>Cart</span>
+                <span className="hidden sm:inline">Cart</span>
                 {cartCount > 0 && (
-                  <span style={{
-                    minWidth: 20, height: 20, padding: "0 5px", borderRadius: 10,
-                    background: "linear-gradient(135deg,#22D3EE,#0891b2)",
-                    color: "#031018", fontSize: 11.5, fontWeight: 800,
-                    display: "flex", alignItems: "center", justifyContent: "center",
-                    boxShadow: "0 0 12px rgba(34,211,238,.6)",
-                  }}>{cartCount}</span>
+                  <span className="min-w-[20px] h-5 px-[5px] rounded-[10px] bg-gradient-to-br from-[#22D3EE] to-[#0891b2] text-[#031018] text-[11.5px] font-extrabold flex items-center justify-center shadow-[0_0_12px_rgba(34,211,238,.6)]">
+                    {cartCount}
+                  </span>
                 )}
               </button>
             )}
 
             {isAdmin && (
-              <button onClick={handleLogout} style={{
-                fontFamily: "'Manrope'", fontWeight: 600, fontSize: 14, color: "rgba(255,255,255,.7)",
-                background: "none", border: "1px solid rgba(255,255,255,.12)",
-                padding: "9px 16px", borderRadius: 11, cursor: "pointer",
-              }}>
+              <button
+                onClick={handleLogout}
+                className="font-['Manrope'] font-semibold text-sm text-white/70 bg-transparent border border-white/[0.12] px-4 py-[9px] rounded-[11px] cursor-pointer hover:text-white hover:border-white/30 transition-all duration-[250ms]"
+              >
                 Déconnexion
               </button>
             )}
@@ -177,16 +162,10 @@ export default function Navbar() {
             {/* Burger */}
             <button
               onClick={() => setMenuOpen(v => !v)}
-              style={{
-                display: "flex", width: 42, height: 42, borderRadius: 12,
-                background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)",
-                cursor: "pointer", color: "#fff", flexDirection: "column",
-                gap: 4, alignItems: "center", justifyContent: "center",
-              }}
-              className="md:hidden"
+              className="md:hidden flex flex-col gap-1 items-center justify-center w-[42px] h-[42px] rounded-[12px] bg-white/[0.05] border border-white/[0.08] cursor-pointer text-white"
             >
-              {[0,1,2].map(i => (
-                <span key={i} style={{ width: 18, height: 2, background: "currentColor", borderRadius: 2, display: "block" }} />
+              {[0, 1, 2].map(i => (
+                <span key={i} className="w-[18px] h-0.5 bg-current rounded-sm block" />
               ))}
             </button>
           </div>
@@ -197,37 +176,58 @@ export default function Navbar() {
       {menuOpen && (
         <div
           onClick={() => setMenuOpen(false)}
-          style={{
-            position: "fixed", inset: 0, zIndex: 100,
-            background: "rgba(5,8,22,.7)", backdropFilter: "blur(10px)",
-            animation: "fadeIn .25s",
-          }}
+          className="fixed inset-0 z-[100] bg-[rgba(5,8,22,.7)] backdrop-blur-[10px] [animation:fadeIn_.25s]"
         >
           <div
             onClick={e => e.stopPropagation()}
-            style={{
-              position: "absolute", top: 0, right: 0, bottom: 0,
-              width: "min(320px,80vw)", background: "rgba(15,23,42,.96)",
-              borderLeft: "1px solid rgba(255,255,255,.08)",
-              padding: "80px 24px 24px",
-              display: "flex", flexDirection: "column", gap: 8,
-              animation: "fadeUp .3s",
-            }}
+            className="absolute top-0 right-0 bottom-0 w-[min(320px,80vw)] bg-[rgba(15,23,42,.96)] border-l border-white/[0.08] pt-20 px-6 pb-6 flex flex-col gap-2 [animation:drawerIn_.3s_cubic-bezier(.2,.9,.3,1)]"
           >
-            {navItems.map(n => (
-              <Link
-                key={n.to} to={n.to}
-                onClick={() => setMenuOpen(false)}
-                style={{
-                  textAlign: "left", fontFamily: "'Space Grotesk'", fontWeight: 600,
-                  fontSize: 22, color: "#fff", textDecoration: "none",
-                  borderBottom: "1px solid rgba(255,255,255,.08)",
-                  padding: "16px 4px",
-                }}
+            {/* Close button */}
+            <button
+              onClick={() => setMenuOpen(false)}
+              className="absolute top-5 right-5 w-9 h-9 rounded-[10px] bg-white/[0.06] border border-white/[0.08] text-white cursor-pointer text-base flex items-center justify-center"
+            >
+              ✕
+            </button>
+
+            {navItems.map(n => {
+              const active = n.to === "/" ? location.pathname === "/" : location.pathname.startsWith(n.to);
+              return (
+                <Link
+                  key={n.to}
+                  to={n.to}
+                  onClick={() => setMenuOpen(false)}
+                  className={`font-['Space_Grotesk'] font-semibold text-[22px] no-underline border-b border-white/[0.08] py-4 px-1 transition-colors duration-200 ${
+                    active ? "text-[#22D3EE]" : "text-white"
+                  }`}
+                >
+                  {n.label}
+                </Link>
+              );
+            })}
+
+            {/* Auth actions in mobile menu */}
+            {!isAdmin && (
+              <button
+                onClick={() => { setMenuOpen(false); setCartOpen(true); }}
+                className="mt-4 flex items-center gap-3 font-['Space_Grotesk'] font-semibold text-lg text-white/70 bg-transparent border-none cursor-pointer py-3 px-1 border-b border-white/[0.08]"
               >
-                {n.label}
-              </Link>
-            ))}
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/>
+                  <line x1="3" y1="6" x2="21" y2="6"/>
+                  <path d="M16 10a4 4 0 01-8 0"/>
+                </svg>
+                Cart {cartCount > 0 && <span className="text-[#22D3EE]">({cartCount})</span>}
+              </button>
+            )}
+            {isAdmin && (
+              <button
+                onClick={handleLogout}
+                className="mt-4 font-['Space_Grotesk'] font-semibold text-lg text-white/70 bg-transparent border-none cursor-pointer text-left py-3 px-1"
+              >
+                Déconnexion
+              </button>
+            )}
           </div>
         </div>
       )}
@@ -236,57 +236,50 @@ export default function Navbar() {
       {cartOpen && (
         <div
           onClick={() => setCartOpen(false)}
-          style={{
-            position: "fixed", inset: 0, zIndex: 110,
-            background: "rgba(5,8,22,.66)", backdropFilter: "blur(10px)",
-            animation: "fadeIn .25s",
-          }}
+          className="fixed inset-0 z-[110] bg-[rgba(5,8,22,.66)] backdrop-blur-[10px] [animation:fadeIn_.25s]"
         >
           <aside
             onClick={e => e.stopPropagation()}
-            style={{
-              position: "absolute", top: 0, right: 0, bottom: 0,
-              width: "min(420px,92vw)",
-              background: "linear-gradient(180deg,rgba(15,23,42,.99),rgba(5,8,22,.99))",
-              borderLeft: "1px solid rgba(255,255,255,.08)",
-              display: "flex", flexDirection: "column",
-              animation: "drawerIn .35s cubic-bezier(.2,.9,.3,1)",
-              boxShadow: "-30px 0 80px -20px rgba(0,0,0,.7)",
-            }}
+            className="absolute top-0 right-0 bottom-0 w-[min(420px,92vw)] bg-[linear-gradient(180deg,rgba(15,23,42,.99),rgba(5,8,22,.99))] border-l border-white/[0.08] flex flex-col [animation:drawerIn_.35s_cubic-bezier(.2,.9,.3,1)] shadow-[-30px_0_80px_-20px_rgba(0,0,0,.7)]"
           >
             {/* Header */}
-            <div style={{ padding: "22px 22px 16px", display: "flex", alignItems: "center", justifyContent: "space-between", borderBottom: "1px solid rgba(255,255,255,.08)" }}>
-              <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 20 }}>
-                Your Cart <span style={{ color: "#94A3B8", fontSize: 14, fontWeight: 500 }}>· {cartCount}</span>
+            <div className="flex items-center justify-between px-[22px] pt-[22px] pb-4 border-b border-white/[0.08]">
+              <span className="font-['Space_Grotesk'] font-bold text-xl">
+                Your Cart <span className="text-slate-400 text-sm font-medium">· {cartCount}</span>
               </span>
-              <button onClick={() => setCartOpen(false)} style={{ width: 34, height: 34, borderRadius: 10, background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.08)", color: "#fff", cursor: "pointer", fontSize: 16 }}>✕</button>
+              <button
+                onClick={() => setCartOpen(false)}
+                className="w-[34px] h-[34px] rounded-[10px] bg-white/[0.06] border border-white/[0.08] text-white cursor-pointer text-base flex items-center justify-center"
+              >
+                ✕
+              </button>
             </div>
 
             {/* Items */}
-            <div style={{ flex: 1, overflowY: "auto", padding: "16px 22px", display: "flex", flexDirection: "column", gap: 14 }}>
+            <div className="flex-1 overflow-y-auto px-[22px] py-4 flex flex-col gap-3.5">
               {cartItems.length === 0 ? (
-                <div style={{ textAlign: "center", padding: "60px 10px", color: "#94A3B8" }}>
-                  <div style={{ width: 64, height: 64, margin: "0 auto 16px", borderRadius: 18, background: "rgba(139,92,246,.12)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 26 }}>🛒</div>
-                  <p style={{ fontFamily: "'Space Grotesk'", color: "#fff", fontSize: 17, margin: "0 0 6px" }}>Your cart is empty</p>
-                  <p style={{ margin: 0, fontSize: 14 }}>Add a device to get started.</p>
+                <div className="text-center py-[60px] px-2.5 text-slate-400">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-[18px] bg-[rgba(139,92,246,.12)] flex items-center justify-center text-[26px]">🛒</div>
+                  <p className="font-['Space_Grotesk'] text-white text-[17px] mt-0 mb-1.5">Your cart is empty</p>
+                  <p className="m-0 text-sm">Add a device to get started.</p>
                 </div>
               ) : (
                 cartItems.map((item, idx) => (
-                  <div key={idx} style={{ display: "flex", gap: 13, alignItems: "center", background: "rgba(255,255,255,.03)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 16, padding: 11 }}>
-                    <div style={{ width: 54, height: 74, borderRadius: 11, flexShrink: 0, overflow: "hidden", background: "rgba(139,92,246,.2)" }}>
-                      {item.image && <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />}
+                  <div key={idx} className="flex gap-3 items-center bg-white/[0.03] border border-white/[0.08] rounded-2xl p-[11px]">
+                    <div className="w-[54px] h-[74px] rounded-[11px] shrink-0 overflow-hidden bg-[rgba(139,92,246,.2)]">
+                      {item.image && <img src={item.image} alt={item.name} className="w-full h-full object-cover" />}
                     </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: 0, fontWeight: 700, fontSize: 14.5, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{item.name}</p>
-                      <p style={{ margin: "7px 0 0", fontFamily: "'Space Grotesk'", fontWeight: 700, color: "#22D3EE", fontSize: 14 }}>{(item.price || 0).toLocaleString()} DA</p>
+                    <div className="flex-1 min-w-0">
+                      <p className="m-0 font-bold text-[14.5px] truncate">{item.name}</p>
+                      <p className="mt-[7px] mb-0 font-['Space_Grotesk'] font-bold text-[#22D3EE] text-sm">{(item.price || 0).toLocaleString()} DA</p>
                     </div>
-                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.05)", borderRadius: 9, padding: 3 }}>
-                        <button onClick={() => updateQty(idx, -1)} style={{ width: 24, height: 24, borderRadius: 7, border: "none", background: "rgba(255,255,255,.08)", color: "#fff", cursor: "pointer", fontSize: 15 }}>−</button>
-                        <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 13, minWidth: 14, textAlign: "center" }}>{item.quantity || 1}</span>
-                        <button onClick={() => updateQty(idx, 1)} style={{ width: 24, height: 24, borderRadius: 7, border: "none", background: "rgba(255,255,255,.08)", color: "#fff", cursor: "pointer", fontSize: 15 }}>+</button>
+                    <div className="flex flex-col items-center gap-1.5">
+                      <div className="flex items-center gap-2 bg-white/[0.05] rounded-[9px] p-[3px]">
+                        <button onClick={() => updateQty(idx, -1)} className="w-6 h-6 rounded-[7px] border-none bg-white/[0.08] text-white cursor-pointer text-[15px] flex items-center justify-center">−</button>
+                        <span className="font-['JetBrains_Mono'] text-[13px] min-w-[14px] text-center">{item.quantity || 1}</span>
+                        <button onClick={() => updateQty(idx, 1)} className="w-6 h-6 rounded-[7px] border-none bg-white/[0.08] text-white cursor-pointer text-[15px] flex items-center justify-center">+</button>
                       </div>
-                      <button onClick={() => removeItem(idx)} style={{ fontSize: 11, color: "#94A3B8", background: "none", border: "none", cursor: "pointer" }}>Remove</button>
+                      <button onClick={() => removeItem(idx)} className="text-[11px] text-slate-400 bg-transparent border-none cursor-pointer hover:text-white transition-colors">Remove</button>
                     </div>
                   </div>
                 ))
@@ -295,25 +288,19 @@ export default function Navbar() {
 
             {/* Checkout */}
             {cartItems.length > 0 && (
-              <div style={{ padding: "18px 22px 22px", borderTop: "1px solid rgba(255,255,255,.08)", background: "rgba(255,255,255,.02)" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 14 }}>
-                  <span style={{ color: "#94A3B8", fontSize: 14 }}>Total</span>
-                  <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 24 }}>{cartTotal.toLocaleString()} DA</span>
+              <div className="px-[22px] pt-[18px] pb-[22px] border-t border-white/[0.08] bg-white/[0.02]">
+                <div className="flex justify-between items-baseline mb-3.5">
+                  <span className="text-slate-400 text-sm">Total</span>
+                  <span className="font-['Space_Grotesk'] font-bold text-2xl">{cartTotal.toLocaleString()} DA</span>
                 </div>
                 <Link
                   to="/checkout"
                   onClick={() => setCartOpen(false)}
-                  style={{
-                    display: "block", width: "100%", padding: 15, border: "none", borderRadius: 14,
-                    background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff",
-                    fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16,
-                    cursor: "pointer", textDecoration: "none", textAlign: "center",
-                    boxShadow: "0 16px 40px -12px rgba(108,43,217,.9)",
-                  }}
+                  className="block w-full py-[15px] border-none rounded-[14px] bg-gradient-to-br from-[#8B5CF6] to-[#6C2BD9] text-white font-['Space_Grotesk'] font-bold text-base cursor-pointer no-underline text-center shadow-[0_16px_40px_-12px_rgba(108,43,217,.9)]"
                 >
                   Checkout · Cash on Delivery
                 </Link>
-                <p style={{ textAlign: "center", margin: "12px 0 0", fontSize: 12.5, color: "#94A3B8" }}>
+                <p className="text-center mt-3 mb-0 text-[12.5px] text-slate-400">
                   🔒 Secure checkout · Free delivery across Algeria
                 </p>
               </div>

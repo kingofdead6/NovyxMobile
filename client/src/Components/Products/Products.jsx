@@ -73,7 +73,7 @@ function ProductCard({ product, index, onClick }) {
 
       {/* Info */}
       <div style={{ position: "relative", zIndex: 4, padding: 18 }}>
-        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#94A3B8", margin: "0 0 6px" }}>{product.category}</p>
+        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#94A3B8", margin: "0 0 6px" }}>{product.brand?.name || ""}</p>
         <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18, margin: "0 0 14px" }}>{product.name}</h3>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
           <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18 }}>{(product.price || 0).toLocaleString()} DA</span>
@@ -102,16 +102,16 @@ export default function ProductsPage() {
   const [availableCategories, setAvailableCategories] = useState([]);
 
   useEffect(() => {
-    const cat = searchParams.get("category");
-    setSelectedCategory(cat || "All");
+    const brand = searchParams.get("brand");
+    setSelectedCategory(brand || "All");
   }, [searchParams]);
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/products/featured`)
+    axios.get(`${API_BASE_URL}/phones/featured`)
       .then(r => {
         const all = r.data || [];
         setProducts(all);
-        const cats = ["All", ...new Set(all.map(p => p.category).filter(Boolean))];
+        const cats = ["All", ...new Set(all.map(p => p.brand?.name).filter(Boolean))];
         setAvailableCategories(cats);
       })
       .catch(() => toast.error("Failed to load products"))
@@ -120,8 +120,9 @@ export default function ProductsPage() {
 
   const filtered = useMemo(() => {
     return products.filter(p => {
-      const matchCat = selectedCategory === "All" || p.category === selectedCategory;
-      const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || (p.category || "").toLowerCase().includes(search.toLowerCase());
+      const brandName = p.brand?.name || "";
+      const matchCat = selectedCategory === "All" || brandName === selectedCategory;
+      const matchSearch = !search || p.name.toLowerCase().includes(search.toLowerCase()) || brandName.toLowerCase().includes(search.toLowerCase());
       return matchCat && matchSearch;
     });
   }, [products, selectedCategory, search]);
@@ -129,7 +130,7 @@ export default function ProductsPage() {
   const setCategory = (cat) => {
     setSelectedCategory(cat);
     if (cat === "All") navigate("/products", { replace: true });
-    else navigate(`/products?category=${encodeURIComponent(cat)}`, { replace: true });
+    else navigate(`/products?brand=${encodeURIComponent(cat)}`, { replace: true });
   };
 
   if (loading) {

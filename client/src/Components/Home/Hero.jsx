@@ -1,7 +1,7 @@
 import { useState, useRef, Suspense, Component } from "react";
 import { useNavigate } from "react-router-dom";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { useGLTF, ContactShadows } from "@react-three/drei";
+import { useGLTF, ContactShadows, OrbitControls } from "@react-three/drei";
 import phoneModel from "../../assets/s_amsung_galaxy_s25_ultra_galaxy.glb";
 
 const STATS = [
@@ -69,29 +69,31 @@ function PhoneFallback() {
   );
 }
 
-function PhoneModel() {
+function PhoneModel({ isInteracting }) {
   const { scene } = useGLTF(phoneModel);
   const ref = useRef();
 
   useFrame((state) => {
-    if (!ref.current) return;
+    if (!ref.current || isInteracting.current) return;
     const t = state.clock.getElapsedTime();
     ref.current.rotation.y = t * 0.35;
     ref.current.position.y = Math.sin(t * 0.6) * 0.08;
   });
 
-  return <primitive ref={ref} object={scene} scale={3.8} rotation={[-0.08, 0, 0]} />;
+  return <primitive ref={ref} object={scene} scale={6.2} rotation={[-0.08, 0, 0]} />;
 }
 
 // Preload so failures surface early and loading is faster on first paint
 useGLTF.preload(phoneModel);
 
 function PhoneCanvas() {
+  const isInteracting = useRef(false);
+
   return (
     <PhoneErrorBoundary fallback={<PhoneFallback />}>
       <Canvas
-        camera={{ position: [0, 0, 2.8], fov: 42 }}
-        style={{ width: "100%", height: "100%" }}
+        camera={{ position: [0, 0, 4.2], fov: 42 }}
+        style={{ width: "100%", height: "100%", touchAction: "none" }}
         gl={{ antialias: true, alpha: true }}
         onCreated={({ gl }) => {
           gl.domElement.addEventListener(
@@ -111,7 +113,7 @@ function PhoneCanvas() {
         <directionalLight position={[0, -3, 3]} intensity={0.5} color="#ffffff" />
         <pointLight position={[0, -2, 2]} intensity={0.6} color="#22D3EE" />
         <Suspense fallback={null}>
-          <PhoneModel />
+          <PhoneModel isInteracting={isInteracting} />
           <ContactShadows
             position={[0, -1.4, 0]}
             opacity={0.45}
@@ -120,6 +122,14 @@ function PhoneCanvas() {
             color="#6C2BD9"
           />
         </Suspense>
+        <OrbitControls
+          enablePan={false}
+          enableZoom={true}
+          minDistance={2}
+          maxDistance={7}
+          onStart={() => { isInteracting.current = true; }}
+          onEnd={() => { isInteracting.current = false; }}
+        />
       </Canvas>
     </PhoneErrorBoundary>
   );
@@ -187,12 +197,12 @@ export default function Hero() {
           {/* Right – real 3D phone */}
           <div style={{ flex: 1, position: "relative", display: "flex", justifyContent: "center", alignItems: "center", minHeight: 520, animation: "scaleIn .9s both" }}>
             {/* Glow + orbit rings */}
-            <div style={{ position: "absolute", width: 380, height: 380, borderRadius: "50%", background: "radial-gradient(circle,rgba(108,43,217,.55),transparent 65%)", filter: "blur(22px)", animation: "glowPulse 5s infinite", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", width: 440, height: 440, border: "1px solid rgba(139,92,246,.22)", borderRadius: "50%", animation: "spinSlow 40s linear infinite", pointerEvents: "none" }} />
-            <div style={{ position: "absolute", width: 340, height: 340, border: "1px solid rgba(34,211,238,.16)", borderRadius: "50%", animation: "spinSlow 28s linear infinite reverse", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", width: 480, height: 480, borderRadius: "50%", background: "radial-gradient(circle,rgba(108,43,217,.55),transparent 65%)", filter: "blur(22px)", animation: "glowPulse 5s infinite", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", width: 560, height: 560, border: "1px solid rgba(139,92,246,.22)", borderRadius: "50%", animation: "spinSlow 40s linear infinite", pointerEvents: "none" }} />
+            <div style={{ position: "absolute", width: 440, height: 440, border: "1px solid rgba(34,211,238,.16)", borderRadius: "50%", animation: "spinSlow 28s linear infinite reverse", pointerEvents: "none" }} />
 
             {/* 3D canvas */}
-            <div style={{ position: "relative", zIndex: 3, width: 320, height: 520 }}>
+            <div style={{ position: "relative", zIndex: 3, width: 460, height: 680, maxWidth: "90vw" }}>
               <PhoneCanvas />
             </div>
 
@@ -231,7 +241,7 @@ export default function Hero() {
           </div>
 
           {/* Centered 3D phone */}
-          <div style={{ position: "relative", marginTop: 40, width: 300, height: 500, animation: "scaleIn 1s both .2s" }}>
+          <div style={{ position: "relative", marginTop: 40, width: 440, height: 660, maxWidth: "90vw", animation: "scaleIn 1s both .2s" }}>
             <div style={{ position: "absolute", width: 360, height: 260, borderRadius: "50%", background: "radial-gradient(ellipse,rgba(108,43,217,.5),transparent 65%)", filter: "blur(30px)", bottom: 0, left: "50%", transform: "translateX(-50%)", pointerEvents: "none" }} />
             <PhoneCanvas />
           </div>

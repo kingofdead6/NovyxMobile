@@ -62,11 +62,12 @@ export default function ProductDetailsPage() {
   useEffect(() => {
     setLoading(true);
     setSelectedImg(0);
-    axios.get(`${API_BASE_URL}/products/${id}`)
+    axios.get(`${API_BASE_URL}/phones/${id}`)
       .then(r => {
         setProduct(r.data);
-        if (r.data.category) {
-          axios.get(`${API_BASE_URL}/products?category=${encodeURIComponent(r.data.category)}`)
+        const brandId = r.data.brand?._id;
+        if (brandId) {
+          axios.get(`${API_BASE_URL}/phones?brand=${brandId}`)
             .then(r2 => setRelated((r2.data || []).filter(p => p._id !== id).slice(0, 4)))
             .catch(() => {});
         }
@@ -156,7 +157,7 @@ export default function ProductDetailsPage() {
                   <div style={{ position: "absolute", top: 11, left: "50%", transform: "translateX(-50%)", width: 74, height: 20, borderRadius: 12, background: "#05070f" }} />
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(115deg,rgba(255,255,255,.3),transparent 38%)" }} />
                   <div style={{ position: "absolute", left: 0, right: 0, bottom: 36, textAlign: "center" }}>
-                    <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: 0 }}>{product.category || "NOVYX"}</p>
+                    <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: 0 }}>{product.brand?.name || "NOVYX"}</p>
                   </div>
                 </div>
               </div>
@@ -178,8 +179,8 @@ export default function ProductDetailsPage() {
         {/* Info */}
         <div style={{ flex: 1, minWidth: 300, animation: "fadeUp .6s both .08s" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-            {product.category && (
-              <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(139,92,246,.16)", border: "1px solid rgba(139,92,246,.35)", color: "#d7c9ff" }}>{product.category}</span>
+            {product.brand?.name && (
+              <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(139,92,246,.16)", border: "1px solid rgba(139,92,246,.35)", color: "#d7c9ff" }}>{product.brand.name}</span>
             )}
             <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, color: "#86efac", display: "inline-flex", alignItems: "center", gap: 6 }}>
               <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#34d399", animation: "ringPulse 2s infinite", display: "block" }} />
@@ -191,6 +192,15 @@ export default function ProductDetailsPage() {
 
           {product.description && (
             <p style={{ fontSize: 17, lineHeight: 1.6, color: "#94A3B8", margin: "0 0 22px" }}>{product.description}</p>
+          )}
+
+          {(product.storage || product.ram || product.color || product.condition) && (
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 22 }}>
+              {product.storage && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(34,211,238,.1)", border: "1px solid rgba(34,211,238,.3)", color: "#67e8f9" }}>{product.storage}</span>}
+              {product.ram && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(34,211,238,.1)", border: "1px solid rgba(34,211,238,.3)", color: "#67e8f9" }}>{product.ram} RAM</span>}
+              {product.color && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", color: "#cbd5e1" }}>{product.color}</span>}
+              {product.condition && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(16,185,129,.1)", border: "1px solid rgba(16,185,129,.3)", color: "#6ee7b7" }}>{product.condition}</span>}
+            </div>
           )}
 
           <div style={{ display: "flex", alignItems: "baseline", gap: 13, marginBottom: 26 }}>

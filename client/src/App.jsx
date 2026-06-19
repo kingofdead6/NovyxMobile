@@ -12,7 +12,7 @@ import Login from "./Pages/Login";
 import ProtectedRoute from "./Components/Shared/ProtectedRoute";
 
 import AdminDashboard from "./Components/Admin/AdminDashboard";
-import AdminProducts from "./Components/Admin/AdminProducts";
+import AdminPhones from "./Components/Admin/AdminProducts";
 import AdminCategories from "./Components/Admin/AdminCategories";
 import AdminDeliveryAreas from "./Components/Admin/AdminDeliveryAreas";
 import AdminUsers from "./Components/Admin/AdminUsers";
@@ -57,7 +57,7 @@ function App() {
             {/* Protected Admin Routes */}
             <Route element={<ProtectedRoute />}>
               <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="/admin/products" element={<AdminProducts />} />
+              <Route path="/admin/products" element={<AdminPhones />} />
               <Route path="/admin/categories" element={<AdminCategories />} />
               <Route path="/admin/delivery-areas" element={<AdminDeliveryAreas />} />
               <Route path="/admin/users" element={<AdminUsers />} />

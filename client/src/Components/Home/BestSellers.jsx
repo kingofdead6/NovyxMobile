@@ -78,7 +78,7 @@ function TiltCard({ product, index, onClick }) {
 
       {/* Info */}
       <div style={{ position: "relative", zIndex: 4, padding: 18 }}>
-        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#94A3B8", margin: "0 0 6px" }}>{product.category}</p>
+        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#94A3B8", margin: "0 0 6px" }}>{product.brand?.name || ""}</p>
         <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18, margin: "0 0 4px" }}>{product.name}</h3>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
           <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 19, color: "#fff" }}>{(product.price || 0).toLocaleString()} DA</span>
@@ -95,7 +95,7 @@ export default function BestSellers() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/products/featured`)
+    axios.get(`${API_BASE_URL}/phones/featured`)
       .then(r => setProducts((r.data || []).slice(0, 8)))
       .catch(() => {})
       .finally(() => setLoading(false));

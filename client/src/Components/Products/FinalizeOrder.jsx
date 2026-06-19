@@ -81,7 +81,7 @@ export default function FinalizeOrder() {
       toast.success("Commande passée avec succès !");
       setIsSuccess(true);
 
-      setTimeout(() => navigate("/products"), 4000);
+      setTimeout(() => navigate("/products"), 4000);  // /products route still maps to the phones page
     } catch (err) {
       toast.error(err.response?.data?.message || "Erreur lors de la commande");
     } finally {

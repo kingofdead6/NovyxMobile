@@ -10,9 +10,13 @@ export default function AdminSellRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const getToken = () => localStorage.getItem("token") || sessionStorage.getItem("token");
+
   const fetchRequests = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/sell-requests`);
+      const res = await axios.get(`${API_BASE_URL}/sell-requests`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       setRequests(res.data);
     } catch (err) {
       toast.error("Erreur de chargement");
@@ -28,7 +32,9 @@ export default function AdminSellRequests() {
   const handleDelete = async (id) => {
     if (!confirm("Supprimer cette proposition ?")) return;
     try {
-      await axios.delete(`${API_BASE_URL}/sell-requests/${id}`);
+      await axios.delete(`${API_BASE_URL}/sell-requests/${id}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       toast.success("Proposition supprimée");
       fetchRequests();
     } catch (err) {

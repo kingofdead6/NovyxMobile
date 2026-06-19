@@ -1,99 +1,63 @@
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API_BASE_URL } from "../../../api";
 import { toast } from "react-toastify";
 import { Plus, Search, Trash2, Home, Package } from "lucide-react";
-import { LanguageContext } from "../context/LanguageContext";
-import { translations } from "../../../translations";
 
 export default function AdminDeliveryAreas() {
-  const { lang } = useContext(LanguageContext);
-  const t = translations[lang]?.adminDeliveryAreas || {};
-  const isRTL = lang === "ar";
-
   const [areas, setAreas] = useState([]);
   const [filteredAreas, setFilteredAreas] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [form, setForm] = useState({ wilaya: "", priceHome: 600, priceDesk: 700, desks: [] });
 
-  const [form, setForm] = useState({
-    wilaya: "",
-    priceHome: 600,
-    priceDesk: 700,
-    desks: [],
-  });
+  useEffect(() => { fetchData(); }, []);
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    setFilteredAreas(areas.filter(a => a.wilaya.toLowerCase().includes(searchTerm.toLowerCase())));
+  }, [areas, searchTerm]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      const res = await axios.get(`${API_BASE_URL}/delivery-areas`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
+      const res = await axios.get(`${API_BASE_URL}/delivery-areas`, { headers: { Authorization: `Bearer ${token}` } });
       setAreas(res.data.areas || []);
       setFilteredAreas(res.data.areas || []);
       setSearchTerm("");
-    } catch (err) {
-      toast.error(t.errorGeneric || "Failed to load delivery areas");
+    } catch {
+      toast.error("Failed to load delivery areas");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const filtered = areas.filter((a) =>
-      a.wilaya.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredAreas(filtered);
-  }, [areas, searchTerm]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!form.wilaya.trim()) return toast.error(t.errorWilayaRequired || "Wilaya is required");
-
+    if (!form.wilaya.trim()) return toast.error("Wilaya name is required");
     setLoading(true);
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
       const payload = {
         wilaya: form.wilaya.trim(),
         priceHome: Number(form.priceHome),
         priceDesk: Number(form.priceDesk),
-        desks: form.desks
-          .map((d) => ({ name: d.name.trim() }))
-          .filter((d) => d.name),
+        desks: form.desks.map(d => ({ name: d.name.trim() })).filter(d => d.name),
       };
-
       if (editingId) {
-        // Update – only changeable fields
-        await axios.put(`${API_BASE_URL}/delivery-areas/${editingId}`, {
-          priceHome: payload.priceHome,
-          priceDesk: payload.priceDesk,
-          desks: payload.desks,
-        }, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        toast.success(t.updatedSuccess || "Updated successfully");
+        await axios.put(`${API_BASE_URL}/delivery-areas/${editingId}`, { priceHome: payload.priceHome, priceDesk: payload.priceDesk, desks: payload.desks }, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success("Updated successfully");
       } else {
-        // Create – wilaya is required here
-        await axios.post(`${API_BASE_URL}/delivery-areas`, payload, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        toast.success(t.addedSuccess?.replace("{wilaya}", form.wilaya) || `Added ${form.wilaya}`);
+        await axios.post(`${API_BASE_URL}/delivery-areas`, payload, { headers: { Authorization: `Bearer ${token}` } });
+        toast.success(`Added ${form.wilaya}`);
       }
-
       resetForm();
       fetchData();
     } catch (err) {
-      toast.error(err?.response?.data?.message || t.errorGeneric || "Operation failed");
+      toast.error(err?.response?.data?.message || "Operation failed");
     } finally {
       setLoading(false);
     }
@@ -107,125 +71,95 @@ export default function AdminDeliveryAreas() {
 
   const handleEdit = (area) => {
     setEditingId(area.id);
-    setForm({
-      wilaya: area.wilaya,
-      priceHome: area.priceHome,
-      priceDesk: area.priceDesk,
-      desks: area.desks?.map((d) => ({ id: Date.now() + Math.random(), name: d.name })) || [],
-    });
+    setForm({ wilaya: area.wilaya, priceHome: area.priceHome, priceDesk: area.priceDesk, desks: area.desks?.map(d => ({ id: Date.now() + Math.random(), name: d.name })) || [] });
     setShowModal(true);
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm(t.deleteConfirm || "Delete this wilaya?")) return;
+    if (!window.confirm("Delete this wilaya?")) return;
     try {
       const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      await axios.delete(`${API_BASE_URL}/delivery-areas/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      toast.success(t.deletedSuccess || "Deleted successfully");
+      await axios.delete(`${API_BASE_URL}/delivery-areas/${id}`, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success("Deleted successfully");
       fetchData();
-    } catch (err) {
-      toast.error(t.errorGeneric || "Delete failed");
+    } catch {
+      toast.error("Delete failed");
     }
   };
 
   return (
-    <motion.section className="min-h-screen py-8 px-4 sm:py-12 mt-10" dir={isRTL ? "rtl" : "ltr"}>
-      <div className="max-w-7xl mx-auto">
+    <motion.section style={{ minHeight: "100vh", padding: "56px 16px 60px" }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
         {/* Header */}
-        <div className="text-center mb-10">
-          <h1 className="text-4xl sm:text-5xl font-extralight tracking-wider text-gray-900">
-            {t.title || "Manage Delivery Areas"}
+        <div style={{ textAlign: "center", marginBottom: 40 }}>
+          <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(28px,5vw,56px)", color: "#fff", margin: "0 0 8px" }}>
+            Delivery Areas
           </h1>
-          <p className="text-lg sm:text-xl text-gray-600 mt-3">
-            {t.subtitle || "Add, edit and manage delivery prices and desks"}
-          </p>
+          <p style={{ color: "#94A3B8", fontSize: 16, margin: 0 }}>Add, edit and manage delivery prices and desks</p>
         </div>
 
         {/* Add + Search */}
-        <div className="flex flex-col sm:flex-row gap-5 mb-12">
+        <div style={{ display: "flex", flexWrap: "wrap", gap: 16, marginBottom: 36 }}>
           <button
-            onClick={() => {
-              resetForm();
-              setShowModal(true);
-            }}
-            className="cursor-pointer flex items-center justify-center gap-3 px-8 py-5 bg-black text-white rounded-2xl font-bold hover:bg-gray-900 transition shadow-lg flex-shrink-0"
+            onClick={() => { resetForm(); setShowModal(true); }}
+            style={{ display: "flex", alignItems: "center", gap: 10, padding: "14px 24px", background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff", fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 15, border: "none", borderRadius: 14, cursor: "pointer", flexShrink: 0 }}
           >
-            <Plus size={28} /> {t.addWilaya || "Add Wilaya"}
+            <Plus size={22} /> Add Wilaya
           </button>
-
-          <div className="relative flex-1">
-            <Search size={24} className="absolute left-5 top-1/2 -translate-y-1/2 text-gray-500" />
+          <div style={{ position: "relative", flex: 1, minWidth: 200 }}>
+            <Search size={20} style={{ position: "absolute", left: 16, top: "50%", transform: "translateY(-50%)", color: "#64748B" }} />
             <input
               type="text"
-              placeholder={t.searchPlaceholder || "Search by wilaya name..."}
+              placeholder="Search by wilaya name..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-14 pr-5 py-5 border border-gray-300 rounded-2xl focus:border-black outline-none text-lg transition"
+              onChange={e => setSearchTerm(e.target.value)}
+              style={{ width: "100%", paddingLeft: 48, paddingRight: 16, paddingTop: 14, paddingBottom: 14, background: "rgba(15,23,42,.7)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 14, color: "#fff", fontSize: 15, outline: "none", boxSizing: "border-box" }}
             />
           </div>
         </div>
 
         {/* Content */}
         {loading ? (
-          <div className="text-center py-24 text-2xl text-gray-600 animate-pulse">
-            {t.loading || "Loading..."}
-          </div>
+          <div style={{ textAlign: "center", padding: "80px 0", color: "#94A3B8", fontSize: 20 }}>Loading...</div>
         ) : filteredAreas.length === 0 ? (
-          <div className="text-center py-24">
-            <p className="text-2xl sm:text-3xl text-gray-500 font-light leading-relaxed">
-              {t.noWilayas || "No delivery areas found"}
-            </p>
-            <button
-              onClick={() => setShowModal(true)}
-              className="mt-8 text-xl underline text-amber-800 hover:text-amber-700 transition"
-            >
-              {t.addFirstWilaya || "Add the first wilaya"}
+          <div style={{ textAlign: "center", padding: "80px 0" }}>
+            <p style={{ color: "#64748B", fontSize: 22, fontWeight: 300 }}>No delivery areas found</p>
+            <button onClick={() => setShowModal(true)} style={{ marginTop: 20, background: "none", border: "none", color: "#8B5CF6", fontSize: 16, cursor: "pointer", textDecoration: "underline" }}>
+              Add the first wilaya
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {filteredAreas.map((area) => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(260px,1fr))", gap: 20 }}>
+            {filteredAreas.map(area => (
               <motion.div
                 key={area.id}
                 whileHover={{ y: -6, scale: 1.02 }}
-                className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden group cursor-pointer hover:shadow-xl transition-all"
+                style={{ background: "rgba(15,23,42,.8)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, overflow: "hidden", backdropFilter: "blur(16px)", cursor: "pointer" }}
                 onClick={() => handleEdit(area)}
               >
-                <div className="p-6 sm:p-8 space-y-6 text-center">
-                  <h3 className="text-2xl sm:text-3xl font-bold text-gray-900">{area.wilaya}</h3>
-
-                  <div className="space-y-5 mt-4">
-                    <div className="flex items-center justify-center gap-4 text-xl">
-                      <Home size={28} className="text-green-600" />
-                      <span className="font-bold">{area.priceHome.toLocaleString()} DA</span>
-                    </div>
-                    <div className="flex items-center justify-center gap-4 text-xl">
-                      <Package size={28} className="text-blue-600" />
-                      <span className="font-bold">{area.priceDesk.toLocaleString()} DA</span>
-                    </div>
-
-                    {area.desks?.length > 0 && (
-                      <div className="text-left mt-5 pt-4 border-t border-gray-100">
-                        <p className="text-sm font-medium text-gray-600 mb-3">Delivery desks:</p>
-                        <ul className="list-disc list-inside text-base text-gray-700 space-y-2 pl-5">
-                          {area.desks.map((d, idx) => (
-                            <li key={idx}>{d.name}</li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
+                <div style={{ padding: 24, textAlign: "center" }}>
+                  <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, color: "#fff", margin: "0 0 16px" }}>{area.wilaya}</h3>
+                  <div style={{ display: "flex", justifyContent: "center", gap: 8, alignItems: "center", marginBottom: 10, color: "#86efac", fontSize: 16 }}>
+                    <Home size={20} />
+                    <span style={{ fontWeight: 700 }}>{area.priceHome.toLocaleString()} DA</span>
                   </div>
-
+                  <div style={{ display: "flex", justifyContent: "center", gap: 8, alignItems: "center", color: "#93c5fd", fontSize: 16 }}>
+                    <Package size={20} />
+                    <span style={{ fontWeight: 700 }}>{area.priceDesk.toLocaleString()} DA</span>
+                  </div>
+                  {area.desks?.length > 0 && (
+                    <div style={{ marginTop: 14, paddingTop: 12, borderTop: "1px solid rgba(255,255,255,.06)", textAlign: "left" }}>
+                      <p style={{ fontSize: 12, color: "#64748B", margin: "0 0 8px", fontFamily: "'JetBrains Mono'" }}>DESKS</p>
+                      <ul style={{ listStyle: "disc", paddingLeft: 18, margin: 0, color: "#94A3B8", fontSize: 13 }}>
+                        {area.desks.map((d, idx) => <li key={idx}>{d.name}</li>)}
+                      </ul>
+                    </div>
+                  )}
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDelete(area.id);
-                    }}
-                    className="w-full py-4 mt-6 bg-red-600 hover:bg-red-700 text-white rounded-xl transition font-medium flex items-center justify-center gap-2 shadow-sm"
+                    onClick={e => { e.stopPropagation(); handleDelete(area.id); }}
+                    style={{ width: "100%", padding: "11px", marginTop: 18, background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.3)", color: "#fca5a5", borderRadius: 12, cursor: "pointer", fontWeight: 600, fontSize: 14, display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
                   >
-                    <Trash2 size={20} /> {t.delete || "Delete"}
+                    <Trash2 size={16} /> Delete
                   </button>
                 </div>
               </motion.div>
@@ -234,139 +168,87 @@ export default function AdminDeliveryAreas() {
         )}
       </div>
 
-      {/* Modal – Add / Edit */}
+      {/* Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div
-            className="fixed inset-0 bg-black/70 z-50 flex items-end sm:items-center justify-center p-4"
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.75)", zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 16, backdropFilter: "blur(8px)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={resetForm}
           >
             <motion.div
-              className="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] overflow-y-auto w-full max-w-2xl"
+              style={{ background: "rgba(15,23,42,.98)", border: "1px solid rgba(255,255,255,.1)", borderRadius: "24px 24px 0 0", maxHeight: "92vh", overflowY: "auto", width: "100%", maxWidth: 640 }}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              onClick={(e) => e.stopPropagation()}
+              onClick={e => e.stopPropagation()}
             >
-              <div className="p-6 sm:p-10">
-                <div className="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-6 sm:hidden" />
-                <h2 className="text-2xl sm:text-3xl font-light text-center mb-8">
-                  {editingId ? t.editWilaya || "Edit Wilaya" : t.addNewWilaya || "Add New Wilaya"}
+              <div style={{ padding: "32px 28px" }}>
+                <div style={{ width: 40, height: 4, background: "rgba(255,255,255,.2)", borderRadius: 4, margin: "0 auto 24px" }} />
+                <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 24, color: "#fff", textAlign: "center", margin: "0 0 28px" }}>
+                  {editingId ? "Edit Wilaya" : "Add New Wilaya"}
                 </h2>
 
-                <form onSubmit={handleSubmit} className="space-y-7">
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                   {!editingId && (
                     <input
                       type="text"
-                      placeholder={t.wilayaPlaceholder || "Wilaya name (e.g. Alger, Oran...)"}
+                      placeholder="Wilaya name (e.g. Alger, Oran...)"
                       value={form.wilaya}
-                      onChange={(e) => setForm({ ...form, wilaya: e.target.value })}
+                      onChange={e => setForm({ ...form, wilaya: e.target.value })}
                       required
-                      className="w-full px-6 py-5 border border-gray-300 rounded-xl text-lg focus:border-black outline-none transition"
+                      style={{ padding: "14px 18px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "#fff", fontSize: 16, outline: "none" }}
                     />
                   )}
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
                     <div>
-                      <label className="block text-base font-medium mb-2">
-                        {t.homeDelivery || "Home Delivery Price (DA)"}
-                      </label>
-                      <input
-                        type="number"
-                        value={form.priceHome}
-                        onChange={(e) => setForm({ ...form, priceHome: +e.target.value })}
-                        min="0"
-                        className="w-full px-5 py-4 border border-gray-300 rounded-xl text-xl focus:border-black outline-none transition"
-                      />
+                      <label style={{ display: "block", fontSize: 13, color: "#94A3B8", marginBottom: 8, fontFamily: "'JetBrains Mono'" }}>HOME DELIVERY (DA)</label>
+                      <input type="number" value={form.priceHome} onChange={e => setForm({ ...form, priceHome: +e.target.value })} min="0"
+                        style={{ width: "100%", padding: "13px 16px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "#fff", fontSize: 18, outline: "none", boxSizing: "border-box" }} />
                     </div>
                     <div>
-                      <label className="block text-base font-medium mb-2">
-                        {t.deskDelivery || "Desk Delivery Price (DA)"}
-                      </label>
-                      <input
-                        type="number"
-                        value={form.priceDesk}
-                        onChange={(e) => setForm({ ...form, priceDesk: +e.target.value })}
-                        min="0"
-                        className="w-full px-5 py-4 border border-gray-300 rounded-xl text-xl focus:border-black outline-none transition"
-                      />
+                      <label style={{ display: "block", fontSize: 13, color: "#94A3B8", marginBottom: 8, fontFamily: "'JetBrains Mono'" }}>DESK DELIVERY (DA)</label>
+                      <input type="number" value={form.priceDesk} onChange={e => setForm({ ...form, priceDesk: +e.target.value })} min="0"
+                        style={{ width: "100%", padding: "13px 16px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 12, color: "#fff", fontSize: 18, outline: "none", boxSizing: "border-box" }} />
                     </div>
                   </div>
 
-                  <div className="space-y-4">
-                    <label className="block text-base font-medium">
-                      {t.desksLabel || "Delivery Desks (optional)"}
-                    </label>
-
-                    {form.desks.map((desk) => (
-                      <div key={desk.id} className="flex gap-3 items-center">
-                        <input
-                          type="text"
-                          value={desk.name}
-                          onChange={(e) => {
-                            const newDesks = form.desks.map((d) =>
-                              d.id === desk.id ? { ...d, name: e.target.value } : d
-                            );
-                            setForm({ ...form, desks: newDesks });
-                          }}
-                          placeholder={t.extraDesk || "Desk name / location"}
-                          className="flex-1 px-5 py-4 border border-gray-300 rounded-xl focus:border-black outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setForm({
-                              ...form,
-                              desks: form.desks.filter((d) => d.id !== desk.id),
-                            })
-                          }
-                          className="p-4 bg-red-50 text-red-700 rounded-xl hover:bg-red-100 transition"
-                        >
-                          <Trash2 size={20} />
-                        </button>
-                      </div>
-                    ))}
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setForm({
-                          ...form,
-                          desks: [...form.desks, { id: Date.now() + Math.random(), name: "" }],
-                        })
-                      }
-                      className="w-full py-4 border-2 border-dashed border-gray-400 rounded-xl text-gray-600 hover:border-gray-600 hover:bg-gray-50 transition"
-                    >
-                      + {t.addDesk || "Add Desk"}
-                    </button>
+                  <div>
+                    <label style={{ display: "block", fontSize: 13, color: "#94A3B8", marginBottom: 12, fontFamily: "'JetBrains Mono'" }}>DELIVERY DESKS (optional)</label>
+                    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                      {form.desks.map(desk => (
+                        <div key={desk.id} style={{ display: "flex", gap: 10 }}>
+                          <input
+                            type="text"
+                            value={desk.name}
+                            onChange={e => setForm({ ...form, desks: form.desks.map(d => d.id === desk.id ? { ...d, name: e.target.value } : d) })}
+                            placeholder="Desk name / location"
+                            style={{ flex: 1, padding: "12px 16px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 10, color: "#fff", fontSize: 14, outline: "none" }}
+                          />
+                          <button type="button" onClick={() => setForm({ ...form, desks: form.desks.filter(d => d.id !== desk.id) })}
+                            style={{ padding: "12px", background: "rgba(239,68,68,.12)", border: "1px solid rgba(239,68,68,.3)", borderRadius: 10, color: "#fca5a5", cursor: "pointer" }}>
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      ))}
+                      <button type="button" onClick={() => setForm({ ...form, desks: [...form.desks, { id: Date.now() + Math.random(), name: "" }] })}
+                        style={{ padding: "13px", border: "1px dashed rgba(255,255,255,.2)", borderRadius: 12, background: "transparent", color: "#94A3B8", cursor: "pointer", fontSize: 14 }}>
+                        + Add Desk
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex flex-col sm:flex-row gap-5 pt-8">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className={`flex-1 py-5 rounded-xl font-bold text-lg transition ${
-                        loading
-                          ? "bg-gray-400 text-white cursor-not-allowed"
-                          : "bg-black text-white hover:bg-gray-900 active:scale-[0.98]"
-                      }`}
-                    >
-                      {loading
-                        ? t.saving || "Saving..."
-                        : editingId
-                        ? t.update || "Update"
-                        : t.save || "Save"}
+                  <div style={{ display: "flex", gap: 14, paddingTop: 8 }}>
+                    <button type="submit" disabled={loading}
+                      style={{ flex: 1, padding: "15px", background: loading ? "#475569" : "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff", fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, border: "none", borderRadius: 14, cursor: loading ? "not-allowed" : "pointer" }}>
+                      {loading ? "Saving..." : editingId ? "Update" : "Save"}
                     </button>
-
-                    <button
-                      type="button"
-                      onClick={resetForm}
-                      className="flex-1 py-5 border-2 border-gray-400 rounded-xl font-bold hover:bg-gray-50 transition text-lg"
-                    >
-                      {t.cancel || "Cancel"}
+                    <button type="button" onClick={resetForm}
+                      style={{ flex: 1, padding: "15px", background: "transparent", border: "1px solid rgba(255,255,255,.15)", color: "#94A3B8", fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, borderRadius: 14, cursor: "pointer" }}>
+                      Cancel
                     </button>
                   </div>
                 </form>

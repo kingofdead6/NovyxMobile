@@ -1,27 +1,17 @@
 "use client";
 
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import { LanguageContext } from "../context/LanguageContext";
-import { translations } from "../../../translations";
 
 export default function CartPage() {
-  const { lang } = useContext(LanguageContext);
-  const t = translations[lang].cart || {};
-  const isRTL = lang === "ar";
-
   const [cartItems, setCartItems] = useState([]);
 
-  // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
-    if (savedCart) {
-      setCartItems(JSON.parse(savedCart));
-    }
+    if (savedCart) setCartItems(JSON.parse(savedCart));
   }, []);
 
-  // Save cart whenever it changes
   useEffect(() => {
     if (cartItems.length > 0) {
       localStorage.setItem("cart", JSON.stringify(cartItems));
@@ -32,7 +22,6 @@ export default function CartPage() {
   }, [cartItems]);
 
   const subtotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const totalItems = cartItems.reduce((sum, item) => sum + item.quantity, 0);
 
   const updateQuantity = (productId, imageIndex, change) => {
     setCartItems(prev =>
@@ -50,104 +39,86 @@ export default function CartPage() {
 
   const removeItem = (productId, imageIndex) => {
     setCartItems(prev =>
-      prev.filter(
-        item => !(item.productId === productId && item.imageIndex === imageIndex)
-      )
+      prev.filter(item => !(item.productId === productId && item.imageIndex === imageIndex))
     );
   };
 
-  // Empty cart
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-screen pt-24 pb-20 px-5 sm:px-8 lg:px-12 text-center" dir={isRTL ? "rtl" : "ltr"}>
+      <div style={{ minHeight: "100vh", paddingTop: 96, paddingBottom: 80, paddingLeft: 20, paddingRight: 20, textAlign: "center" }}>
         <Link
           to="/products"
-          className="inline-flex items-center gap-2 text-stone-600 hover:text-blue-800 mb-10 text-lg font-light tracking-wide transition-colors"
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#94A3B8", textDecoration: "none", marginBottom: 40, fontSize: 16 }}
         >
-          <ArrowLeft size={22} />
-          {t.backToShop || "Retour à la collection"}
+          <ArrowLeft size={20} /> Back to Shop
         </Link>
-
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-light tracking-tight text-stone-950 mb-10">
-          {t.emptyCart || "Votre panier est vide"}
+        <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(32px,6vw,56px)", color: "#fff", marginBottom: 40 }}>
+          Your cart is empty
         </h1>
-
         <Link
           to="/products"
-          className="inline-block px-10 py-4 bg-stone-900 hover:bg-blue-800 text-white rounded-xl text-lg font-medium transition-all shadow-sm hover:shadow-md"
+          style={{ display: "inline-block", padding: "16px 32px", background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff", fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, borderRadius: 14, textDecoration: "none" }}
         >
-          {t.continueShopping || "Continuer vos achats"}
+          Continue Shopping
         </Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-32 md:pb-24" dir={isRTL ? "rtl" : "ltr"}>
-      <div className="max-w-7xl mx-auto px-5 sm:px-8 lg:px-12">
+    <div style={{ minHeight: "100vh", paddingTop: 96, paddingBottom: 128 }}>
+      <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 20px" }}>
         {/* Header */}
-        <div className="flex items-center gap-4 mb-10">
-          <Link to="/products" className="cursor-pointer text-stone-600 hover:text-blue-800 transition">
+        <div style={{ display: "flex", alignItems: "center", gap: 16, marginBottom: 40 }}>
+          <Link to="/products" style={{ color: "#94A3B8", textDecoration: "none" }}>
             <ArrowLeft size={28} />
           </Link>
-          <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-stone-950">
-            {t.yourCart || "Votre Panier"} ({cartItems.length})
+          <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(28px,5vw,48px)", color: "#fff", margin: 0 }}>
+            Your Cart ({cartItems.length})
           </h1>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 lg:gap-16">
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 40 }}>
           {/* Cart Items */}
-          <div className="lg:col-span-2 space-y-6">
+          <div style={{ gridColumn: "1 / -1", display: "flex", flexDirection: "column", gap: 16 }}>
             {cartItems.map(item => (
               <div
                 key={`${item.productId}-${item.imageIndex}`}
-                className="group bg-white rounded-2xl border border-stone-100 hover:border-blue-500/50 overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-blue-100/30"
+                style={{ background: "rgba(15,23,42,.7)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, overflow: "hidden", backdropFilter: "blur(10px)" }}
               >
-                <div className="flex flex-col sm:flex-row sm:items-center gap-6 p-5 sm:p-6">
-                  <Link to={`/product/${item.productId}`} className="shrink-0">
-                    <div className="w-full sm:w-32 aspect-square overflow-hidden rounded-xl">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      />
+                <div style={{ display: "flex", alignItems: "center", gap: 20, padding: 20, flexWrap: "wrap" }}>
+                  <Link to={`/product/${item.productId}`}>
+                    <div style={{ width: 96, height: 96, borderRadius: 14, overflow: "hidden", flexShrink: 0 }}>
+                      <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                     </div>
                   </Link>
 
-                  <div className="flex-1 space-y-5">
-                    <div>
-                      <h3 className="text-lg sm:text-xl font-light text-stone-900 line-clamp-2 leading-tight">
-                        {item.name}
-                      </h3>
-                    </div>
+                  <div style={{ flex: 1, minWidth: 200 }}>
+                    <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 600, fontSize: 17, color: "#fff", margin: "0 0 12px" }}>
+                      {item.name}
+                    </h3>
 
-                    <div className="flex items-center gap-5">
+                    <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                       <button
                         onClick={() => updateQuantity(item.productId, item.imageIndex, -1)}
-                        className="cursor-pointer w-11 h-11 rounded-xl border border-stone-300 text-stone-700 hover:border-blue-500 hover:text-blue-700 transition text-2xl flex items-center justify-center"
-                      >
-                        −
-                      </button>
-                      <span className="text-xl font-medium w-12 text-center text-stone-900">
-                        {item.quantity}
-                      </span>
+                        style={{ width: 40, height: 40, borderRadius: 10, border: "1px solid rgba(255,255,255,.15)", background: "rgba(255,255,255,.05)", color: "#fff", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+                      >−</button>
+                      <span style={{ fontSize: 18, fontWeight: 600, color: "#fff", width: 32, textAlign: "center" }}>{item.quantity}</span>
                       <button
                         onClick={() => updateQuantity(item.productId, item.imageIndex, 1)}
-                        className="cursor-pointer w-11 h-11 rounded-xl border border-stone-300 text-stone-700 hover:border-blue-500 hover:text-blue-700 transition text-2xl flex items-center justify-center"
-                      >
-                        +
-                      </button>
+                        style={{ width: 40, height: 40, borderRadius: 10, border: "1px solid rgba(255,255,255,.15)", background: "rgba(255,255,255,.05)", color: "#fff", fontSize: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+                      >+</button>
                     </div>
 
-                    <div className="flex justify-between items-center">
-                      <p className="text-xl sm:text-2xl font-medium text-blue-700 tracking-wide">
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                      <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 20, color: "#8B5CF6", margin: 0 }}>
                         {(item.price * item.quantity).toLocaleString()} DA
                       </p>
                       <button
                         onClick={() => removeItem(item.productId, item.imageIndex)}
-                        className="cursor-pointer text-sm text-stone-500 hover:text-blue-800 transition underline"
+                        style={{ fontSize: 13, color: "#64748B", background: "none", border: "none", cursor: "pointer", textDecoration: "underline" }}
                       >
-                        {t.remove || "Supprimer"}
+                        Remove
                       </button>
                     </div>
                   </div>
@@ -157,54 +128,33 @@ export default function CartPage() {
           </div>
 
           {/* Order Summary */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl border border-stone-100 shadow-sm p-6 lg:p-8 sticky top-24">
-              <h3 className="text-2xl font-light tracking-tight text-stone-950 mb-8">
-                {t.orderSummary || "Résumé de la commande"}
-              </h3>
+          <div style={{ background: "rgba(15,23,42,.8)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, padding: 28, backdropFilter: "blur(16px)", alignSelf: "start", gridColumn: "1 / -1", maxWidth: 420, marginLeft: "auto" }}>
+            <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, color: "#fff", margin: "0 0 24px" }}>
+              Order Summary
+            </h3>
 
-              <div className="space-y-6 text-lg">
-                <div className="flex justify-between text-stone-700">
-                  <span>{t.subtotal || "Sous-total"}</span>
-                  <span className="font-medium">{subtotal.toLocaleString()} DA</span>
-                </div>
-                <div className="pt-6 border-t border-stone-200">
-                  <div className="flex justify-between text-2xl font-medium text-stone-950">
-                    <span>{t.total || "Total"}</span>
-                    <span className="text-blue-700">{subtotal.toLocaleString()} DA</span>
-                  </div>
-                </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 16, fontSize: 16, color: "#94A3B8" }}>
+              <div style={{ display: "flex", justifyContent: "space-between" }}>
+                <span>Subtotal</span>
+                <span style={{ color: "#fff", fontWeight: 600 }}>{subtotal.toLocaleString()} DA</span>
               </div>
-
-              <Link to="/checkout" className="block mt-10">
-                <button className="cursor-pointer w-full py-5 bg-stone-900 hover:bg-blue-800 text-white text-lg font-medium rounded-xl transition-all duration-300 shadow-sm hover:shadow-md">
-                  {t.proceedToCheckout || "Passer à la caisse"}
-                </button>
-              </Link>
-
-              <Link
-                to="/products"
-                className="cursor-pointer block text-center mt-6 text-stone-600 hover:text-blue-800 transition text-base font-light"
-              >
-                {t.continueShopping || "Continuer vos achats"}
-              </Link>
+              <div style={{ paddingTop: 16, borderTop: "1px solid rgba(255,255,255,.08)", display: "flex", justifyContent: "space-between", fontSize: 20, fontWeight: 700, color: "#fff" }}>
+                <span>Total</span>
+                <span style={{ color: "#8B5CF6" }}>{subtotal.toLocaleString()} DA</span>
+              </div>
             </div>
-          </div>
-        </div>
 
-        {/* Mobile Sticky Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-stone-200 shadow-2xl p-4 md:hidden z-50">
-          <div className="max-w-7xl mx-auto flex items-center justify-between">
-            <div>
-              <p className="text-sm text-stone-600">{t.total || "Total"}</p>
-              <p className="text-2xl font-medium text-blue-700">
-                {subtotal.toLocaleString()} DA
-              </p>
-            </div>
-            <Link to="/checkout">
-              <button className="px-8 py-4 bg-stone-900 hover:bg-blue-800 text-white rounded-xl font-medium transition shadow-sm">
-                {t.checkout || "Caisse"}
+            <Link to="/checkout" style={{ display: "block", marginTop: 28 }}>
+              <button style={{ width: "100%", padding: "16px", background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff", fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 17, borderRadius: 14, border: "none", cursor: "pointer", boxShadow: "0 16px 40px -12px rgba(108,43,217,.9)" }}>
+                Proceed to Checkout
               </button>
+            </Link>
+
+            <Link
+              to="/products"
+              style={{ display: "block", textAlign: "center", marginTop: 16, color: "#64748B", textDecoration: "none", fontSize: 14 }}
+            >
+              Continue Shopping
             </Link>
           </div>
         </div>

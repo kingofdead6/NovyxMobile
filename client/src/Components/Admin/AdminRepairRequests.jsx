@@ -11,9 +11,13 @@ export default function AdminRepairRequests() {
   const [loading, setLoading] = useState(true);
   const [selectedRequest, setSelectedRequest] = useState(null);
 
+  const getToken = () => localStorage.getItem("token") || sessionStorage.getItem("token");
+
   const fetchRequests = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/repair-requests`);
+      const res = await axios.get(`${API_BASE_URL}/repair-requests`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       setRequests(res.data);
     } catch (err) {
       toast.error("Erreur de chargement");
@@ -28,9 +32,10 @@ export default function AdminRepairRequests() {
 
   const handleDelete = async (id) => {
     if (!confirm("Supprimer cette demande de réparation ?")) return;
-    
     try {
-      await axios.delete(`${API_BASE_URL}/repair-requests/${id}`);
+      await axios.delete(`${API_BASE_URL}/repair-requests/${id}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       toast.success("Demande supprimée");
       fetchRequests();
     } catch (err) {

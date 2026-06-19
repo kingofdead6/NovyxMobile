@@ -11,9 +11,13 @@ export default function AdminContactMessages() {
   const [loading, setLoading] = useState(true);
   const [selectedMessage, setSelectedMessage] = useState(null);
 
+  const getToken = () => localStorage.getItem("token") || sessionStorage.getItem("token");
+
   const fetchMessages = async () => {
     try {
-      const res = await axios.get(`${API_BASE_URL}/contact`);
+      const res = await axios.get(`${API_BASE_URL}/contact`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       setMessages(res.data);
     } catch (err) {
       toast.error("Erreur de chargement des messages");
@@ -28,9 +32,10 @@ export default function AdminContactMessages() {
 
   const handleDelete = async (id) => {
     if (!confirm("Supprimer ce message ?")) return;
-    
     try {
-      await axios.delete(`${API_BASE_URL}/contact/${id}`);
+      await axios.delete(`${API_BASE_URL}/contact/${id}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       toast.success("Message supprimé");
       fetchMessages();
     } catch (err) {

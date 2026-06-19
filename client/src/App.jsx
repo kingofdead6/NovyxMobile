@@ -26,6 +26,10 @@ import ContactPage from "./Pages/Contact.tsx";
 import AdminSellRequests from "./Components/Admin/AdminSellRequests";
 import AdminContactMessages from "./Components/Admin/AdminContactMessages.jsx";
 import AdminRepairRequests from "./Components/Admin/AdminRepairRequests.jsx";
+import AdminPhoneBrands from "./Components/Admin/AdminPhoneBrands.jsx";
+import AdminAccessoriesCategories from "./Components/Admin/AdminAccessoriesCategories.jsx";
+import AdminAccessories from "./Components/Admin/AdminAccessories.jsx";
+import AdminCases from "./Components/Admin/AdminCases.jsx";
 
 function App() {
   return (
@@ -66,6 +70,10 @@ function App() {
               <Route path="/admin/sell-requests" element={<AdminSellRequests />} />
               <Route path="/admin/contacts" element={<AdminContactMessages />} />
               <Route path="/admin/repair-requests" element={<AdminRepairRequests />} />
+              <Route path="/admin/phone-brands" element={<AdminPhoneBrands />} />
+              <Route path="/admin/accessories-categories" element={<AdminAccessoriesCategories />} />
+              <Route path="/admin/accessories" element={<AdminAccessories />} />
+              <Route path="/admin/cases" element={<AdminCases />} />
             </Route>
 
             {/* 404 Route */}

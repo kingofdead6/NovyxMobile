@@ -1,160 +1,147 @@
-// src/pages/admin/AdminDashboard.jsx
-import { useState, useEffect, useRef, useContext } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { LanguageContext } from "../context/LanguageContext";
-import { translations } from "../../../translations";
+
+const ADMIN_SECTIONS = [
+  { path: "/admin/orders", title: "Manage Orders", description: "View and update order statuses" },
+  { path: "/admin/products", title: "Manage Phones", description: "Create, edit and delete phone listings" },
+  { path: "/admin/accessories", title: "Manage Accessories", description: "Create, edit and delete accessories" },
+  { path: "/admin/cases", title: "Manage Cases", description: "Create, edit and delete phone cases" },
+  { path: "/admin/gallery", title: "Manage Gallery", description: "Manage your gallery images" },
+  { path: "/admin/sell-requests", title: "Sell Requests", description: "Manage user sell requests" },
+  { path: "/admin/contacts", title: "Contact Messages", description: "Manage user contact messages" },
+  { path: "/admin/repair-requests", title: "Repair Requests", description: "Manage user repair requests" },
+];
+
+const SUPERADMIN_EXTRA = [
+  { path: "/admin/users", title: "Manage Users", description: "Create, edit and delete admin accounts" },
+  { path: "/admin/phone-brands", title: "Phone Brands", description: "Add and manage phone brands" },
+  { path: "/admin/accessories-categories", title: "Accessories Categories", description: "Manage accessory categories" },
+  { path: "/admin/categories", title: "Product Categories", description: "Add and edit product categories" },
+  { path: "/admin/delivery-areas", title: "Delivery Areas", description: "Add and update delivery prices by wilaya" },
+];
 
 export default function AdminDashboard() {
-  const { lang } = useContext(LanguageContext);
-  const t = translations[lang].adminDashboard;
-  const isRTL = lang === "ar";
   const navigate = useNavigate();
-
   const [userType, setUserType] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const titleRef = useRef(null);
 
   useEffect(() => {
-    const checkToken = () => {
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      if (!token) {
-        toast.error(t.loginRequired);
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    if (!token) {
+      toast.error("Please sign in to access the dashboard.");
+      navigate("/login");
+      return;
+    }
+    try {
+      const decoded = jwtDecode(token);
+      if (decoded.usertype === "admin" || decoded.usertype === "superadmin") {
+        setUserType(decoded.usertype);
+      } else {
+        toast.error("Unauthorized access.");
         navigate("/login");
-        return;
       }
-
-      try {
-        const decoded = jwtDecode(token);
-        if (decoded.usertype === "admin" || decoded.usertype === "superadmin") {
-          setUserType(decoded.usertype);
-        } else {
-          toast.error(t.unauthorized);
-          navigate("/login");
-        }
-      } catch (error) {
-        toast.error(t.invalidToken);
-        navigate("/login");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    checkToken();
-  }, [navigate, t]);
+    } catch {
+      toast.error("Invalid token. Please sign in again.");
+      navigate("/login");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     sessionStorage.removeItem("token");
-    toast.success(t.logoutSuccess);
+    toast.success("Logged out successfully.");
     navigate("/login");
   };
 
-  const adminSections = [
-    { path: "/admin/orders", title: t.manageOrders, description: t.manageOrdersDesc },
-    { path: "/admin/products", title: t.manageProducts, description: t.manageProductsDesc },
-    { path: "/admin/gallery", title: "Manage Gallery", description: "Manage your gallery images" },
-    { path: "/admin/sell-requests", title: "Manage Sell Requests", description: "Manage user sell requests" },
-    { path: "/admin/contacts", title: "Manage Contact Messages", description: "Manage user contact messages" },
-    { path: "/admin/repair-requests", title: "Manage Repair Requests", description: "Manage user repair requests" }
-  ];
-
-  const superadminSections = [
-    ...adminSections,
-    { path: "/admin/users", title: t.manageUsers, description: t.manageUsersDesc },
-    { path: "/admin/categories", title: t.manageCategories, description: t.manageCategoriesDesc },
-    { path: "/admin/delivery-areas", title: t.manageDeliveryAreas, description: t.manageDeliveryAreasDesc },
-    
-
-  ];
-
-  const sections = userType === "superadmin" ? superadminSections : adminSections;
+  const sections = userType === "superadmin"
+    ? [...ADMIN_SECTIONS, ...SUPERADMIN_EXTRA]
+    : ADMIN_SECTIONS;
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-xl font-light text-gray-600">{t.loading}</p>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ color: "#94A3B8", fontSize: 20 }}>Loading dashboard...</p>
       </div>
     );
   }
 
   return (
-    <>
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.7 }}
-        className="min-h-screen py-20 pt-32 "
-        dir={isRTL ? "rtl" : "ltr"}
-      >
-        <div className="max-w-7xl mx-auto px-6">
-          {/* Header */}
-          <div className="text-center mb-20">
-            <motion.h1
-              ref={titleRef}
-              initial={{ opacity: 0, y: -40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.9, ease: "easeOut" }}
-              className="text-6xl font-extralight tracking-widest text-gray-900"
-            >
-              {userType === "superadmin" ? t.welcomeSuperAdmin : t.welcomeAdmin}
-            </motion.h1>    
-          </div>
-
-          {/* Dashboard Grid */}
-          <motion.div
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"
-            initial={{ opacity: 0, y: 50 }}
+    <motion.section
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.7 }}
+      style={{ minHeight: "100vh", padding: "80px 24px 60px" }}
+    >
+      <div style={{ maxWidth: 1280, margin: "0 auto" }}>
+        {/* Header */}
+        <div style={{ textAlign: "center", marginBottom: 64 }}>
+          <motion.h1
+            initial={{ opacity: 0, y: -40 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
+            transition={{ duration: 0.9, ease: "easeOut" }}
+            style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(36px,6vw,72px)", letterSpacing: "-.03em", color: "#fff", margin: 0 }}
           >
-            {sections.map((section, index) => (
-              <motion.div
-                key={section.title}
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.15 }}
-                whileHover={{ y: -12, scale: 1.03 }}
-                className="group"
-              >
-                <Link to={section.path}>
-                  <div className="bg-white rounded-3xl p-10 shadow-lg hover:shadow-2xl transition-all duration-400 h-full flex flex-col justify-between border border-gray-100">
-                    <div>
-                      <h2 className="text-3xl font-medium text-gray-900 group-hover:text-black transition-colors">
-                        {section.title}
-                      </h2>
-                      <p className="mt-5 text-gray-600 font-light leading-relaxed text-lg">
-                        {section.description}
-                      </p>
-                    </div>
-                    <div className="mt-10 flex justify-end">
-                      <span className="inline-flex items-center text-lg font-semibold text-gray-600 group-hover:text-black transition-all">
-                        {t.manage}
-                        <svg className={`w-6 h-6 ml-3 group-hover:translate-x-2 transition-transform ${isRTL ? "mr-3 ml-0 rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Logout Button */}
-          <div className="mt-24 text-center">
-            <button
-              onClick={handleLogout}
-              className="cursor-pointer px-12 py-5 bg-red-600 text-white text-xl font-medium rounded-2xl hover:bg-red-700 transition-all duration-300 shadow-xl hover:shadow-2xl"
-            >
-              {t.logout}
-            </button>
-          </div>
+            {userType === "superadmin" ? "Super Admin" : "Admin Dashboard"}
+          </motion.h1>
         </div>
-      </motion.section>
-    </>
+
+        {/* Grid */}
+        <motion.div
+          style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(300px,1fr))", gap: 28 }}
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.3 }}
+        >
+          {sections.map((section, index) => (
+            <motion.div
+              key={section.path}
+              initial={{ opacity: 0, y: 40 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              whileHover={{ y: -8, scale: 1.02 }}
+            >
+              <Link to={section.path} style={{ textDecoration: "none" }}>
+                <div style={{ background: "rgba(15,23,42,.8)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, padding: "36px 28px", height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", backdropFilter: "blur(16px)", transition: "border-color .25s", boxSizing: "border-box" }}
+                  onMouseEnter={e => e.currentTarget.style.borderColor = "rgba(139,92,246,.4)"}
+                  onMouseLeave={e => e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"}
+                >
+                  <div>
+                    <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, color: "#fff", margin: "0 0 12px" }}>
+                      {section.title}
+                    </h2>
+                    <p style={{ fontSize: 15, color: "#94A3B8", lineHeight: 1.6, margin: 0 }}>
+                      {section.description}
+                    </p>
+                  </div>
+                  <div style={{ marginTop: 28, display: "flex", justifyContent: "flex-end" }}>
+                    <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 13, fontWeight: 600, color: "#8B5CF6", letterSpacing: ".04em" }}>
+                      MANAGE →
+                    </span>
+                  </div>
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        {/* Logout */}
+        <div style={{ marginTop: 60, textAlign: "center" }}>
+          <button
+            onClick={handleLogout}
+            style={{ padding: "14px 40px", background: "rgba(239,68,68,.15)", border: "1px solid rgba(239,68,68,.3)", color: "#fca5a5", fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, borderRadius: 14, cursor: "pointer", transition: "all .25s" }}
+            onMouseEnter={e => { e.currentTarget.style.background = "rgba(239,68,68,.25)"; e.currentTarget.style.borderColor = "rgba(239,68,68,.5)"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(239,68,68,.15)"; e.currentTarget.style.borderColor = "rgba(239,68,68,.3)"; }}
+          >
+            Sign Out
+          </button>
+        </div>
+      </div>
+    </motion.section>
   );
 }

@@ -27,6 +27,8 @@ export default function AdminGallery() {
     fetchGallery();
   }, []);
 
+  const getToken = () => localStorage.getItem("token") || sessionStorage.getItem("token");
+
   const handleUpload = async (e) => {
     const files = e.target.files;
     if (!files.length) return;
@@ -36,7 +38,9 @@ export default function AdminGallery() {
     Array.from(files).forEach(file => formData.append("images", file));
 
     try {
-      await axios.post(`${API_BASE_URL}/gallery`, formData);
+      await axios.post(`${API_BASE_URL}/gallery`, formData, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       toast.success("Images ajoutées avec succès");
       fetchGallery();
     } catch (err) {
@@ -49,7 +53,9 @@ export default function AdminGallery() {
   const handleDelete = async (id) => {
     if (!confirm("Supprimer cette image ?")) return;
     try {
-      await axios.delete(`${API_BASE_URL}/gallery/${id}`);
+      await axios.delete(`${API_BASE_URL}/gallery/${id}`, {
+        headers: { Authorization: `Bearer ${getToken()}` },
+      });
       toast.success("Image supprimée");
       fetchGallery();
     } catch (err) {

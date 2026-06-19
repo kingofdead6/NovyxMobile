@@ -5,336 +5,220 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { API_BASE_URL } from "../../../api";
 import { toast } from "react-toastify";
-import { Plus, Search, Trash2, X, Upload } from "lucide-react";
+import { Plus, Search, Trash2, X, Upload, Image } from "lucide-react";
+
+const getToken = () => localStorage.getItem("token") || sessionStorage.getItem("token");
+
+const S = {
+  page: { minHeight: "100vh", padding: "56px 24px 80px" },
+  inner: { maxWidth: 1280, margin: "0 auto" },
+  h1: { fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(28px,4vw,52px)", color: "#fff", margin: "0 0 8px", letterSpacing: "-.02em" },
+  subtitle: { color: "#64748B", fontSize: 15, margin: "0 0 36px" },
+  toolbar: { display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 36 },
+  addBtn: { display: "flex", alignItems: "center", gap: 9, padding: "13px 24px", background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff", border: "none", borderRadius: 14, fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 15, cursor: "pointer", whiteSpace: "nowrap" },
+  searchWrap: { position: "relative", flex: "1 1 220px" },
+  searchIcon: { position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#64748B", pointerEvents: "none" },
+  searchInput: { width: "100%", padding: "13px 14px 13px 42px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, color: "#fff", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 18 },
+  card: { background: "rgba(15,23,42,.85)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, overflow: "hidden", display: "flex", flexDirection: "column", transition: "border-color .2s, box-shadow .2s, transform .2s", cursor: "default", position: "relative" },
+  imgWrap: { width: "100%", aspectRatio: "4/3", background: "rgba(139,92,246,.07)", overflow: "hidden", flexShrink: 0 },
+  img: { width: "100%", height: "100%", objectFit: "cover", display: "block", transition: "transform .5s" },
+  imgPlaceholder: { width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center" },
+  cardBody: { padding: "14px 16px 16px", flex: 1, display: "flex", flexDirection: "column", gap: 4 },
+  cardName: { fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, color: "#E2E8F0", margin: 0 },
+  cardDesc: { fontSize: 12, color: "#64748B", margin: 0, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" },
+  delBtn: { position: "absolute", top: 10, right: 10, background: "rgba(239,68,68,.85)", border: "none", color: "#fff", borderRadius: 8, width: 30, height: 30, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", opacity: 0, transition: "opacity .2s" },
+  empty: { textAlign: "center", color: "#334155", fontSize: 20, paddingTop: 80, fontFamily: "'Space Grotesk'" },
+  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,.8)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 },
+  modal: { background: "#0D1526", border: "1px solid rgba(255,255,255,.1)", borderRadius: 24, width: "100%", maxWidth: 520, maxHeight: "85vh", display: "flex", flexDirection: "column", boxShadow: "0 24px 80px rgba(0,0,0,.6)" },
+  modalHeader: { padding: "22px 26px 18px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,.07)", flexShrink: 0 },
+  modalTitle: { fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 20, color: "#fff", margin: 0 },
+  closeBtn: { background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", color: "#94A3B8", borderRadius: 10, padding: 6, cursor: "pointer", display: "flex" },
+  modalBody: { overflowY: "auto", padding: "22px 26px", display: "flex", flexDirection: "column", gap: 16 },
+  label: { fontSize: 11, color: "#64748B", fontFamily: "'JetBrains Mono'", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 6, display: "block" },
+  input: { padding: "13px 16px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, color: "#fff", fontSize: 15, outline: "none", fontFamily: "inherit", width: "100%", boxSizing: "border-box" },
+  textarea: { padding: "13px 16px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, color: "#fff", fontSize: 15, outline: "none", fontFamily: "inherit", width: "100%", minHeight: 80, resize: "vertical", boxSizing: "border-box" },
+  fileZone: { display: "block", padding: "20px 14px", border: "2px dashed rgba(139,92,246,.4)", borderRadius: 12, color: "#8B5CF6", fontSize: 14, cursor: "pointer", textAlign: "center" },
+  btnRow: { display: "flex", gap: 12, paddingTop: 4 },
+  submitBtn: { flex: 1, padding: "14px", background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff", border: "none", borderRadius: 12, fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 15, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 },
+  cancelBtn: { flex: 1, padding: "14px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", color: "#94A3B8", borderRadius: 12, fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 15, cursor: "pointer" },
+};
 
 export default function AdminCategories() {
   const [categories, setCategories] = useState([]);
-  const [filteredCategories, setFilteredCategories] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(false);
-
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [newCategoryName, setNewCategoryName] = useState("");
-  const [newCategoryDescription, setNewCategoryDescription] = useState("");
-  const [selectedImage, setSelectedImage] = useState(null);
+  const [showModal, setShowModal] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [imageFile, setImageFile] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
+  const [creating, setCreating] = useState(false);
 
-  const [isCreating, setIsCreating] = useState(false);
-
+  useEffect(() => { fetchCategories(); }, []);
   useEffect(() => {
-    fetchCategories();
-  }, []);
-
-  useEffect(() => {
-    const filtered = categories.filter(cat =>
-      cat.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredCategories(filtered);
+    setFiltered(categories.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase())));
   }, [categories, searchTerm]);
 
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      const res = await axios.get(`${API_BASE_URL}/categories`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await axios.get(`${API_BASE_URL}/categories`, { headers: { Authorization: `Bearer ${getToken()}` } });
       setCategories(res.data);
-    } catch (err) {
-      toast.error("Failed to load categories");
-    } finally {
-      setLoading(false);
-    }
+    } catch { toast.error("Failed to load categories"); }
+    finally { setLoading(false); }
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setSelectedImage(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
+  const resetForm = () => { setName(""); setDescription(""); setImageFile(null); setImagePreview(null); setShowModal(false); };
 
-  const handleAddCategory = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!newCategoryName.trim()) {
-      return toast.error("Category name is required");
-    }
-
-    setIsCreating(true);
-
+    if (!name.trim()) return toast.error("Category name is required");
+    setCreating(true);
     try {
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-
-      const formData = new FormData();
-      formData.append("name", newCategoryName.trim());
-      if (newCategoryDescription.trim()) {
-        formData.append("description", newCategoryDescription.trim());
-      }
-      if (selectedImage) {
-        formData.append("image", selectedImage);
-      }
-
-      const res = await axios.post(`${API_BASE_URL}/categories`, formData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "multipart/form-data",
-        },
+      const fd = new FormData();
+      fd.append("name", name.trim());
+      if (description.trim()) fd.append("description", description.trim());
+      if (imageFile) fd.append("image", imageFile);
+      const res = await axios.post(`${API_BASE_URL}/categories`, fd, {
+        headers: { Authorization: `Bearer ${getToken()}`, "Content-Type": "multipart/form-data" },
       });
-
-      setCategories([...categories, res.data]);
+      setCategories(prev => [...prev, res.data]);
+      toast.success("Category added");
       resetForm();
-      setShowAddModal(false);
-      toast.success("Category added successfully");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to add category");
-    } finally {
-      setIsCreating(false);
-    }
+    } catch (err) { toast.error(err.response?.data?.message || "Failed to add"); }
+    finally { setCreating(false); }
   };
 
-  const resetForm = () => {
-    setNewCategoryName("");
-    setNewCategoryDescription("");
-    setSelectedImage(null);
-    setImagePreview(null);
-  };
-
-  const handleDeleteCategory = async (id, name) => {
-    if (!window.confirm(`Delete category "${name}"?`)) return;
-
+  const handleDelete = async (id, catName) => {
+    if (!window.confirm(`Delete category "${catName}"?`)) return;
     try {
-      const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-      await axios.delete(`${API_BASE_URL}/categories/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCategories(categories.filter(cat => cat._id !== id));
+      await axios.delete(`${API_BASE_URL}/categories/${id}`, { headers: { Authorization: `Bearer ${getToken()}` } });
+      setCategories(prev => prev.filter(c => c._id !== id));
       toast.success("Category deleted");
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Failed to delete");
-    }
+    } catch (err) { toast.error(err.response?.data?.message || "Failed to delete"); }
   };
 
   return (
-    <>
-      <motion.section
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="min-h-screen py-8 px-4 mt-14"
-      >
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-10">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-semibold tracking-tight text-stone-950">
-              Category Management
-            </h1>
-            <p className="mt-4 text-lg text-stone-600">
-              Add, edit and manage your categories with images
-            </p>
+    <div style={S.page}>
+      <div style={S.inner}>
+        <h1 style={S.h1}>Category Management</h1>
+        <p style={S.subtitle}>Add, edit and manage your categories with images</p>
+
+        <div style={S.toolbar}>
+          <button style={S.addBtn} onClick={() => setShowModal(true)}><Plus size={20} /> Add Category</button>
+          <div style={S.searchWrap}>
+            <Search style={S.searchIcon} size={17} />
+            <input style={S.searchInput} placeholder="Search categories..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
           </div>
-
-          {/* Controls */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-10">
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center justify-center gap-3 px-6 py-4 bg-stone-900 text-white font-medium rounded-2xl hover:bg-blue-700 transition"
-            >
-              <Plus size={24} />
-              Add category
-            </button>
-
-            <div className="relative flex-1">
-              <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-stone-500" />
-              <input
-                type="text"
-                placeholder="Search categories..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 border border-stone-300 rounded-2xl focus:border-stone-900 outline-none"
-              />
-            </div>
-          </div>
-
-          {/* Categories Grid */}
-          {loading ? (
-            <div className="text-center py-20">
-              <p className="text-xl text-stone-500">Loading...</p>
-            </div>
-          ) : filteredCategories.length === 0 ? (
-            <div className="text-center py-20">
-              <p className="text-2xl text-stone-400">No categories found</p>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredCategories.map((category) => (
-                <motion.div
-                  key={category._id}
-                  whileHover={{ y: -4 }}
-                  className="group bg-white rounded-3xl overflow-hidden border border-stone-200 hover:shadow-xl transition-all relative"
-                >
-                  {/* Image Container */}
-                  <div className="relative h-56 overflow-hidden bg-stone-100">
-                    {category.image?.url ? (
-                      <motion.img
-                        src={category.image.url}
-                        alt={category.name}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                        whileHover={{ scale: 1.1 }}
-                        transition={{ duration: 0.6 }}
-                        onError={(e) => {
-                          e.target.src = "/placeholder.jpg";
-                          e.target.onerror = null;
-                        }}
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center text-stone-400 text-sm">
-                        No image available
-                      </div>
-                    )}
-
-                    <motion.div
-                      className="absolute inset-0 bg-black/20"
-                      whileHover={{ backgroundColor: "rgba(0, 0, 0, 0.35)" }}
-                      transition={{ duration: 0.3 }}
-                    />
-                  </div>
-
-                  <div className="p-6">
-                    <h3 className="font-semibold text-lg text-stone-900">{category.name}</h3>
-                    {category.description && (
-                      <p className="text-sm text-stone-600 mt-2 line-clamp-2">{category.description}</p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => handleDeleteCategory(category._id, category.name)}
-                    className="absolute top-3 right-3 p-2 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition hover:bg-red-700"
-                  >
-                    <Trash2 size={18} />
-                  </button>
-                </motion.div>
-              ))}
-            </div>
-          )}
         </div>
 
-        {/* Add Category Modal */}
-        <AnimatePresence>
-          {showAddModal && (
-            <motion.div
-              className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => { setShowAddModal(false); resetForm(); }}
-            >
+        {loading ? (
+          <p style={{ color: "#94A3B8", textAlign: "center", paddingTop: 60 }}>Loading...</p>
+        ) : filtered.length === 0 ? (
+          <p style={S.empty}>No categories found</p>
+        ) : (
+          <div style={S.grid}>
+            {filtered.map((cat, i) => (
               <motion.div
-                className="bg-white rounded-3xl shadow-2xl w-full max-w-lg"
-                initial={{ scale: 0.95, y: 20 }}
-                animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.95, y: 20 }}
-                onClick={(e) => e.stopPropagation()}
+                key={cat._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.04 }}
+                style={S.card}
+                onMouseEnter={e => {
+                  e.currentTarget.style.borderColor = "rgba(139,92,246,.35)";
+                  e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,.4)";
+                  e.currentTarget.style.transform = "translateY(-4px)";
+                  e.currentTarget.querySelector(".del-btn").style.opacity = "1";
+                  const img = e.currentTarget.querySelector(".card-img");
+                  if (img) img.style.transform = "scale(1.08)";
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.borderColor = "rgba(255,255,255,.08)";
+                  e.currentTarget.style.boxShadow = "";
+                  e.currentTarget.style.transform = "";
+                  e.currentTarget.querySelector(".del-btn").style.opacity = "0";
+                  const img = e.currentTarget.querySelector(".card-img");
+                  if (img) img.style.transform = "";
+                }}
               >
-                <div className="p-8">
-                  <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-semibold">New Category</h2>
-                    <button
-                      onClick={() => { setShowAddModal(false); resetForm(); }}
-                      className="text-stone-400 hover:text-stone-600"
-                    >
-                      <X size={28} />
-                    </button>
-                  </div>
-
-                  <form onSubmit={handleAddCategory} className="space-y-6">
-                    <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-2">Category name</label>
-                      <input
-                        type="text"
-                        value={newCategoryName}
-                        onChange={(e) => setNewCategoryName(e.target.value)}
-                        className="w-full px-5 py-4 border border-stone-300 rounded-2xl focus:border-stone-900 outline-none"
-                        placeholder="e.g. Phone Cases"
-                        required
-                        disabled={isCreating}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-2">Description (optional)</label>
-                      <textarea
-                        value={newCategoryDescription}
-                        onChange={(e) => setNewCategoryDescription(e.target.value)}
-                        className="w-full px-5 py-4 border border-stone-300 rounded-2xl focus:border-stone-900 outline-none h-24 resize-y"
-                        placeholder="Category description..."
-                        disabled={isCreating}
-                      />
-                    </div>
-
-                    <div>
-                      <label className="block text-sm font-medium text-stone-700 mb-3">Category image</label>
-                      <div className="border-2 border-dashed border-stone-300 rounded-2xl p-8 text-center hover:border-stone-400 transition">
-                        <input
-                          type="file"
-                          onChange={handleImageChange}
-                          className="hidden"
-                          id="category-image"
-                          disabled={isCreating}
-                        />
-                        <label htmlFor="category-image" className="cursor-pointer flex flex-col items-center">
-                          <Upload size={40} className="text-stone-400 mb-3" />
-                          <span className="text-sm text-stone-600">Click to add an image</span>
-                          <span className="text-xs text-stone-500 mt-1">(Recommended: 800x600px)</span>
-                        </label>
-                      </div>
-
-                      {imagePreview && (
-                        <div className="mt-4 relative">
-                          <img src={imagePreview} alt="Preview" className="w-full h-48 object-cover rounded-2xl" />
-                          <button
-                            type="button"
-                            onClick={() => { setSelectedImage(null); setImagePreview(null); }}
-                            className="absolute top-2 right-2 bg-red-600 text-white p-1 rounded-full"
-                            disabled={isCreating}
-                          >
-                            <X size={16} />
-                          </button>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="flex gap-4 pt-4">
-                      <button
-                        type="submit"
-                        className="flex-1 py-4 bg-stone-900 text-white rounded-2xl font-medium hover:bg-blue-700 transition disabled:bg-stone-400 flex items-center justify-center gap-2"
-                        disabled={isCreating || !newCategoryName.trim()}
-                      >
-                        {isCreating ? (
-                          <>
-                            <span className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full"></span>
-                            Creating...
-                          </>
-                        ) : (
-                          "Create category"
-                        )}
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => { setShowAddModal(false); resetForm(); }}
-                        className="flex-1 py-4 border border-stone-300 rounded-2xl font-medium hover:bg-stone-100 transition"
-                        disabled={isCreating}
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </form>
+                <div style={S.imgWrap}>
+                  {cat.image?.url ? (
+                    <img className="card-img" src={cat.image.url} alt={cat.name} style={S.img}
+                      onError={e => { e.target.src = "/placeholder.jpg"; e.target.onerror = null; }} />
+                  ) : (
+                    <div style={S.imgPlaceholder}><Image size={36} color="rgba(139,92,246,.3)" /></div>
+                  )}
                 </div>
+                <div style={S.cardBody}>
+                  <p style={S.cardName}>{cat.name}</p>
+                  {cat.description && <p style={S.cardDesc}>{cat.description}</p>}
+                </div>
+                <button className="del-btn" style={S.delBtn} onClick={() => handleDelete(cat._id, cat.name)}>
+                  <Trash2 size={14} />
+                </button>
               </motion.div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <AnimatePresence>
+        {showModal && (
+          <motion.div style={S.overlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            onClick={resetForm}>
+            <motion.div style={S.modal} initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
+              onClick={e => e.stopPropagation()}>
+
+              <div style={S.modalHeader}>
+                <h2 style={S.modalTitle}>New Category</h2>
+                <button style={S.closeBtn} onClick={resetForm}><X size={18} /></button>
+              </div>
+
+              <div style={S.modalBody}>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+                  <div>
+                    <label style={S.label}>Category name</label>
+                    <input style={S.input} placeholder="e.g. Phone Cases" value={name} onChange={e => setName(e.target.value)} required disabled={creating} />
+                  </div>
+                  <div>
+                    <label style={S.label}>Description (optional)</label>
+                    <textarea style={S.textarea} placeholder="Category description..." value={description} onChange={e => setDescription(e.target.value)} disabled={creating} />
+                  </div>
+                  <div>
+                    <label style={S.label}>Image (optional)</label>
+                    <label style={S.fileZone}>
+                      <input type="file" accept="image/*" style={{ display: "none" }} disabled={creating}
+                        onChange={e => { const f = e.target.files[0]; if (f) { setImageFile(f); setImagePreview(URL.createObjectURL(f)); } }} />
+                      <Upload size={28} style={{ margin: "0 auto 8px", display: "block", color: "#8B5CF6" }} />
+                      <span>Click to upload</span>
+                      <span style={{ display: "block", fontSize: 12, color: "#64748B", marginTop: 4 }}>Recommended: 800×600px</span>
+                    </label>
+                    {imagePreview && (
+                      <div style={{ position: "relative", marginTop: 10 }}>
+                        <img src={imagePreview} alt="Preview" style={{ width: "100%", height: 160, objectFit: "cover", borderRadius: 12 }} />
+                        <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }}
+                          style={{ position: "absolute", top: 8, right: 8, background: "#EF4444", border: "none", color: "#fff", borderRadius: "50%", width: 24, height: 24, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 }}>
+                          <X size={13} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                  <div style={S.btnRow}>
+                    <button type="submit" style={{ ...S.submitBtn, opacity: creating ? 0.7 : 1 }} disabled={creating || !name.trim()}>
+                      {creating ? <><span style={{ width: 16, height: 16, border: "2px solid #fff", borderTopColor: "transparent", borderRadius: "50%", animation: "spin .7s linear infinite", display: "inline-block" }} /> Creating...</> : "Create category"}
+                    </button>
+                    <button type="button" style={S.cancelBtn} onClick={resetForm} disabled={creating}>Cancel</button>
+                  </div>
+                </form>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </motion.section>
-    </>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
   );
 }

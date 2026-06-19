@@ -1,174 +1,271 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../../api";
+import { toast } from "react-toastify";
 
-const CATEGORY_GRADIENTS = [
-  ["#F59E0B", "#92400E"],
-  ["#6C2BD9", "#4C1D95"],
-  ["#0EA5E9", "#0369A1"],
-  ["#10B981", "#065F46"],
-  ["#EC4899", "#9D174D"],
-  ["#22D3EE", "#0E7490"],
+const GRADIENTS = [
+  ["#8B5CF6", "#6C2BD9"],
+  ["#22D3EE", "#0891B2"],
+  ["#F59E0B", "#D97706"],
+  ["#EC4899", "#BE185D"],
+  ["#10B981", "#059669"],
+  ["#6366F1", "#4338CA"],
 ];
 
-export default function AccessoriesPage() {
-  const [categories, setCategories] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+function AccessoryCard({ item, index }) {
+  const cardRef = useRef(null);
+  const [g1, g2] = GRADIENTS[index % GRADIENTS.length];
 
-  useEffect(() => {
-    axios
-      .get(`${API_BASE_URL}/accessories-categories`)
-      .then((r) => setCategories(r.data))
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, []);
+  const onMouseMove = (e) => {
+    const card = cardRef.current;
+    if (!card) return;
+    const rect = card.getBoundingClientRect();
+    const rx = ((e.clientY - rect.top) / rect.height - 0.5) * -10;
+    const ry = ((e.clientX - rect.left) / rect.width - 0.5) * 10;
+    card.style.transform = `perspective(800px) rotateX(${rx}deg) rotateY(${ry}deg)`;
+    card.style.setProperty("--mx", `${((e.clientX - rect.left) / rect.width) * 100}%`);
+    card.style.setProperty("--my", `${((e.clientY - rect.top) / rect.height) * 100}%`);
+  };
+
+  const onMouseLeave = () => {
+    const card = cardRef.current;
+    if (!card) return;
+    card.style.transform = "perspective(800px) rotateX(0) rotateY(0)";
+  };
+
+  const addToCart = (e) => {
+    e.stopPropagation();
+    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
+    const existing = cart.findIndex(c => c._id === item._id);
+    if (existing >= 0) {
+      cart[existing].quantity = (cart[existing].quantity || 1) + 1;
+    } else {
+      cart.push({ _id: item._id, name: item.name, price: item.price, image: item.images?.[0]?.url, quantity: 1 });
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    window.dispatchEvent(new Event("cartUpdated"));
+    toast.success(`${item.name} added to cart`);
+  };
 
   return (
-    <main style={{ minHeight: "100vh", position: "relative", zIndex: 2 }}>
-      {/* Hero */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "80px 26px 40px" }}>
-        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 12.5, letterSpacing: ".12em", color: "#22D3EE", margin: "0 0 14px" }}>
-          // ACCESSORIES
-        </p>
-        <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(36px,5vw,64px)", letterSpacing: "-.03em", margin: "0 0 18px", lineHeight: 1.1 }}>
-          Shop Accessories
-        </h1>
-        <p style={{ fontFamily: "'Manrope'", fontSize: 17, color: "#94A3B8", margin: 0, maxWidth: 520, lineHeight: 1.65 }}>
-          Chargers, earphones, power banks, and everything else you need to get the most out of your device.
-        </p>
-      </section>
+    <div
+      ref={cardRef}
+      onMouseMove={onMouseMove}
+      onMouseLeave={onMouseLeave}
+      style={{
+        position: "relative", borderRadius: 22, overflow: "hidden",
+        border: "1px solid rgba(255,255,255,.08)",
+        background: "linear-gradient(170deg,rgba(255,255,255,.055),rgba(255,255,255,.015))",
+        backdropFilter: "blur(8px)",
+        transition: "box-shadow .3s",
+        transformStyle: "preserve-3d",
+        animation: "fadeUp .55s both",
+        animationDelay: `${index * 0.05}s`,
+        "--mx": "50%", "--my": "50%",
+      }}
+      onMouseEnter={e => (e.currentTarget.style.boxShadow = "0 34px 60px -22px rgba(34,211,238,.4)")}
+    >
+      {/* Mouse-follow glow */}
+      <div style={{ position: "absolute", inset: 0, background: "radial-gradient(220px circle at var(--mx) var(--my),rgba(34,211,238,.15),transparent 60%)", pointerEvents: "none", zIndex: 3 }} />
 
-      {/* Category Grid */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 26px 40px" }}>
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28, flexWrap: "wrap", gap: 14 }}>
-          <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: 0 }}>
-            Shop by Category
-          </h2>
-          <button
-            onClick={() => navigate("/products?type=accessory")}
-            style={{ fontFamily: "'Manrope'", fontWeight: 600, fontSize: 14, color: "#94A3B8", background: "none", border: "none", cursor: "pointer", transition: "color .2s" }}
-            onMouseEnter={e => (e.currentTarget.style.color = "#fff")}
-            onMouseLeave={e => (e.currentTarget.style.color = "#94A3B8")}
-          >
-            View all accessories →
-          </button>
-        </div>
-
-        {loading ? (
-          <div className="nv-brand-row">
-            {[...Array(4)].map((_, i) => (
-              <div key={i} style={{ flex: 1, minWidth: 200, height: 280, borderRadius: 24, background: "rgba(255,255,255,.04)", border: "1px solid rgba(255,255,255,.06)", animation: "glowPulse 1.8s infinite" }} />
-            ))}
-          </div>
-        ) : categories.length > 0 ? (
-          <div className="nv-brand-row">
-            {categories.map((cat, idx) => {
-              const [g1, g2] = CATEGORY_GRADIENTS[idx % CATEGORY_GRADIENTS.length];
-              return (
-                <div
-                  key={cat._id}
-                  className="nv-brand-card"
-                  onClick={() => navigate(`/products?accessoryCategory=${encodeURIComponent(cat.name)}`)}
-                  style={{ position: "relative", borderRadius: 24, cursor: "pointer", border: "1px solid rgba(255,255,255,.08)", background: "linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.01))" }}
-                >
-                  <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", zIndex: 0 }}>
-                    <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 120%,${g1},transparent 70%)`, opacity: 0.55 }} />
-                    <div style={{ position: "absolute", top: -30, right: -30, width: 140, height: 140, borderRadius: "50%", background: `linear-gradient(135deg,${g1},${g2})`, filter: "blur(34px)", opacity: 0.6, animation: "blob 12s ease-in-out infinite" }} />
-                  </div>
-                  {cat.image?.url && (
-                    <img src={cat.image.url} alt={cat.name} className="nv-brand-logo" />
-                  )}
-                  <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 22 }}>
-                    <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, color: "rgba(255,255,255,.6)" }}>Category</span>
-                    <div>
-                      <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: "0 0 6px" }}>{cat.name}</h3>
-                      {cat.description && (
-                        <p style={{ fontFamily: "'Manrope'", fontSize: 13, color: "rgba(255,255,255,.6)", margin: 0, lineHeight: 1.4, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                          {cat.description}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+      {/* Image */}
+      <div style={{ position: "relative", height: 220, display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(circle at 50% 30%,rgba(34,211,238,.1),transparent 60%)", overflow: "hidden" }}>
+        {item.images?.[0]?.url ? (
+          <img
+            src={item.images[0].url}
+            alt={item.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", transform: "translateZ(20px)" }}
+          />
         ) : (
-          /* Fallback static categories if API returns empty */
-          <div className="nv-brand-row">
-            {[
-              { name: "Chargers", icon: "⚡", desc: "Fast charging cables and adapters" },
-              { name: "Earphones", icon: "🎧", desc: "Wired and wireless audio" },
-              { name: "Power Banks", icon: "🔋", desc: "Stay charged anywhere" },
-              { name: "Screen Protectors", icon: "🛡️", desc: "Keep your screen pristine" },
-            ].map((cat, idx) => {
-              const [g1, g2] = CATEGORY_GRADIENTS[idx % CATEGORY_GRADIENTS.length];
-              return (
-                <div
-                  key={cat.name}
-                  className="nv-brand-card"
-                  onClick={() => navigate(`/products?accessoryCategory=${encodeURIComponent(cat.name)}`)}
-                  style={{ position: "relative", borderRadius: 24, cursor: "pointer", border: "1px solid rgba(255,255,255,.08)", background: "linear-gradient(165deg,rgba(255,255,255,.05),rgba(255,255,255,.01))" }}
-                >
-                  <div style={{ position: "absolute", inset: 0, borderRadius: 24, overflow: "hidden", zIndex: 0 }}>
-                    <div style={{ position: "absolute", inset: 0, background: `radial-gradient(circle at 50% 120%,${g1},transparent 70%)`, opacity: 0.55 }} />
-                    <div style={{ position: "absolute", top: -30, right: -30, width: 140, height: 140, borderRadius: "50%", background: `linear-gradient(135deg,${g1},${g2})`, filter: "blur(34px)", opacity: 0.6, animation: "blob 12s ease-in-out infinite" }} />
-                  </div>
-                  <div style={{ position: "relative", zIndex: 2, height: "100%", display: "flex", flexDirection: "column", justifyContent: "space-between", padding: 22 }}>
-                    <span style={{ fontSize: 32 }}>{cat.icon}</span>
-                    <div>
-                      <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: "0 0 6px" }}>{cat.name}</h3>
-                      <p style={{ fontFamily: "'Manrope'", fontSize: 13, color: "rgba(255,255,255,.6)", margin: 0, lineHeight: 1.4 }}>{cat.desc}</p>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
+          <div style={{ width: 100, height: 100, borderRadius: 20, background: `linear-gradient(135deg,${g1},${g2})`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 38, transform: "translateZ(20px)" }}>
+            📦
           </div>
         )}
-      </section>
+      </div>
 
-      {/* All Accessories CTA */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 26px 80px" }}>
-        <div
-          style={{
-            background: "linear-gradient(135deg,rgba(14,165,233,.1),rgba(16,185,129,.08))",
-            border: "1px solid rgba(14,165,233,.2)",
-            borderRadius: 28,
-            padding: "48px 40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            gap: 30,
-            flexWrap: "wrap",
-          }}
-        >
-          <div>
-            <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 26, margin: "0 0 10px" }}>
-              Browse all accessories
-            </h3>
-            <p style={{ fontFamily: "'Manrope'", fontSize: 15, color: "#94A3B8", margin: 0 }}>
-              Find the perfect accessory for your device.
-            </p>
-          </div>
+      {/* Info */}
+      <div style={{ position: "relative", zIndex: 4, padding: 18 }}>
+        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#22D3EE", margin: "0 0 5px", letterSpacing: ".04em" }}>
+          {item.category?.name?.toUpperCase() || "ACCESSORY"}
+        </p>
+        <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 17, margin: "0 0 4px", lineHeight: 1.25 }}>
+          {item.name}
+        </h3>
+        {item.brand && (
+          <p style={{ fontFamily: "'Manrope'", fontSize: 12.5, color: "#64748B", margin: "0 0 14px" }}>{item.brand}</p>
+        )}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+          <span style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18 }}>
+            {(item.price || 0).toLocaleString()} DA
+          </span>
           <button
-            onClick={() => navigate("/products?type=accessory")}
+            onClick={addToCart}
             style={{
-              fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16,
-              padding: "16px 36px", borderRadius: 16, border: "none",
-              background: "linear-gradient(135deg,#0EA5E9,#0369A1)", color: "#fff",
-              cursor: "pointer", boxShadow: "0 12px 32px -8px rgba(14,165,233,.7)",
-              transition: "transform .2s,box-shadow .2s", whiteSpace: "nowrap",
+              fontFamily: "'Manrope'", fontWeight: 600, fontSize: 13,
+              padding: "9px 14px", borderRadius: 11,
+              border: "1px solid rgba(34,211,238,.35)",
+              background: "rgba(34,211,238,.1)", color: "#67e8f9",
+              cursor: "pointer", transition: "all .25s",
             }}
-            onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-2px)"; e.currentTarget.style.boxShadow = "0 18px 40px -8px rgba(14,165,233,.9)"; }}
-            onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.boxShadow = "0 12px 32px -8px rgba(14,165,233,.7)"; }}
+            onMouseEnter={e => { e.currentTarget.style.background = "#0891b2"; e.currentTarget.style.color = "#fff"; e.currentTarget.style.borderColor = "#0891b2"; }}
+            onMouseLeave={e => { e.currentTarget.style.background = "rgba(34,211,238,.1)"; e.currentTarget.style.color = "#67e8f9"; e.currentTarget.style.borderColor = "rgba(34,211,238,.35)"; }}
           >
-            View All Accessories
+            Add to Cart
           </button>
         </div>
-      </section>
-    </main>
+      </div>
+    </div>
+  );
+}
+
+export default function AccessoriesPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const [items, setItems] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [selectedCat, setSelectedCat] = useState("All");
+
+  // Sync category from URL param
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    setSelectedCat(cat || "All");
+  }, [searchParams]);
+
+  useEffect(() => {
+    const fetchAll = async () => {
+      try {
+        const [itemsRes, catsRes] = await Promise.all([
+          axios.get(`${API_BASE_URL}/accessories`),
+          axios.get(`${API_BASE_URL}/accessories-categories`),
+        ]);
+        setItems(itemsRes.data || []);
+        setCategories(catsRes.data || []);
+      } catch {
+        toast.error("Failed to load accessories");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAll();
+  }, []);
+
+  const filtered = useMemo(() => {
+    return items.filter(item => {
+      const catName = item.category?.name || "";
+      const matchCat = selectedCat === "All" || catName === selectedCat;
+      const matchSearch = !search
+        || item.name.toLowerCase().includes(search.toLowerCase())
+        || catName.toLowerCase().includes(search.toLowerCase())
+        || (item.brand || "").toLowerCase().includes(search.toLowerCase());
+      return matchCat && matchSearch;
+    });
+  }, [items, selectedCat, search]);
+
+  const setCategory = (name) => {
+    setSelectedCat(name);
+    if (name === "All") navigate("/accessories", { replace: true });
+    else navigate(`/accessories?category=${encodeURIComponent(name)}`, { replace: true });
+  };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <p style={{ fontFamily: "'Space Grotesk'", fontSize: 22, color: "#22D3EE", animation: "glowPulse 1.5s infinite" }}>
+          Loading accessories…
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ animation: "fadeIn .5s", maxWidth: 1280, margin: "0 auto", padding: "50px 26px 60px" }}>
+      {/* Header */}
+      <div style={{ animation: "fadeUp .6s both", marginBottom: 30 }}>
+        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 12.5, letterSpacing: ".12em", color: "#22D3EE", margin: "0 0 10px" }}>
+          // {filtered.length} ITEMS
+        </p>
+        <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(34px,5vw,58px)", letterSpacing: "-.025em", margin: 0 }}>
+          Accessories
+        </h1>
+      </div>
+
+      {/* Sticky filter bar */}
+      <div style={{
+        position: "sticky", top: 72, zIndex: 40,
+        background: "rgba(5,8,22,.7)", backdropFilter: "blur(16px)",
+        border: "1px solid rgba(255,255,255,.08)", borderRadius: 18,
+        padding: 14, marginBottom: 28,
+        display: "flex", flexDirection: "column", gap: 13,
+      }}>
+        {/* Search */}
+        <div style={{ display: "flex", alignItems: "center", gap: 11, background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 13, padding: "11px 15px" }}>
+          <span style={{ color: "#94A3B8", fontSize: 17 }}>⌕</span>
+          <input
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            placeholder="Search accessories, brands, categories…"
+            style={{ flex: 1, background: "none", border: "none", outline: "none", color: "#fff", fontFamily: "'Manrope'", fontSize: 15 }}
+          />
+          {search && (
+            <button
+              onClick={() => setSearch("")}
+              style={{ background: "none", border: "none", color: "#64748B", cursor: "pointer", fontSize: 16, lineHeight: 1, padding: 0 }}
+            >
+              ✕
+            </button>
+          )}
+        </div>
+
+        {/* Category chips */}
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          {["All", ...categories.map(c => c.name)].map(cat => {
+            const active = selectedCat === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                style={{
+                  fontFamily: "'Manrope'", fontWeight: 600, fontSize: 13.5,
+                  padding: "8px 15px", borderRadius: 11, cursor: "pointer", transition: "all .25s",
+                  color: active ? "#fff" : "#94A3B8",
+                  background: active ? "rgba(34,211,238,.25)" : "rgba(255,255,255,.04)",
+                  border: `1px solid ${active ? "rgba(34,211,238,.55)" : "rgba(255,255,255,.08)"}`,
+                }}
+              >
+                {cat}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Empty state */}
+      {filtered.length === 0 && (
+        <div style={{ textAlign: "center", padding: "80px 20px", color: "#94A3B8" }}>
+          <div style={{ fontSize: 48, marginBottom: 16 }}>📦</div>
+          <p style={{ fontFamily: "'Space Grotesk'", fontSize: 22, color: "#fff", margin: "0 0 8px" }}>No accessories found</p>
+          <p style={{ margin: 0 }}>Try a different category or search term.</p>
+          {(search || selectedCat !== "All") && (
+            <button
+              onClick={() => { setSearch(""); setCategory("All"); }}
+              style={{ marginTop: 20, padding: "10px 22px", borderRadius: 12, background: "rgba(34,211,238,.15)", border: "1px solid rgba(34,211,238,.3)", color: "#22D3EE", fontFamily: "'Space Grotesk'", fontWeight: 600, fontSize: 14, cursor: "pointer" }}
+            >
+              Clear filters
+            </button>
+          )}
+        </div>
+      )}
+
+      {/* Grid */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(258px,1fr))", gap: 18 }}>
+        {filtered.map((item, i) => (
+          <AccessoryCard key={item._id} item={item} index={i} />
+        ))}
+      </div>
+    </div>
   );
 }

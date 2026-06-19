@@ -1,9 +1,33 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import axios from "axios";
 import { API_BASE_URL } from "../../../api";
 import { toast } from "react-toastify";
 import { CheckCircle, ArrowLeft } from "lucide-react";
+
+const inputStyle = {
+  width: "100%",
+  padding: "16px 20px",
+  background: "rgba(255,255,255,.05)",
+  border: "1px solid rgba(255,255,255,.1)",
+  borderRadius: 14,
+  fontSize: 16,
+  color: "#fff",
+  outline: "none",
+  boxSizing: "border-box",
+  fontFamily: "'Space Grotesk', sans-serif",
+  transition: "border-color .2s",
+};
+
+const labelStyle = {
+  display: "block",
+  marginBottom: 8,
+  fontSize: 14,
+  fontWeight: 600,
+  color: "#94A3B8",
+  fontFamily: "'Space Grotesk', sans-serif",
+  letterSpacing: ".04em",
+};
 
 export default function FinalizeOrder() {
   const navigate = useNavigate();
@@ -17,38 +41,35 @@ export default function FinalizeOrder() {
   const [form, setForm] = useState({
     customerName: "",
     phone: "",
-    customerEmail: "",        // ← Email added
+    customerEmail: "",
     wilaya: "",
     desk: "",
     address: "",
     deliveryType: "desk",
   });
 
-  // Load Cart
   useEffect(() => {
     const savedCart = localStorage.getItem("cart");
     if (!savedCart || savedCart === "[]") {
-      toast.error("Votre panier est vide");
+      toast.error("Your cart is empty");
       navigate("/cart");
       return;
     }
     setCartItems(JSON.parse(savedCart));
   }, [navigate]);
 
-  // Load Wilayas
   useEffect(() => {
     const fetchWilayas = async () => {
       try {
         const res = await axios.get(`${API_BASE_URL}/delivery-areas`);
         setAvailableWilayas(res.data.areas || []);
       } catch (err) {
-        toast.error("Impossible de charger les zones de livraison");
+        toast.error("Failed to load delivery areas");
       }
     };
     fetchWilayas();
   }, []);
 
-  // Calculate Delivery Price
   useEffect(() => {
     if (!form.wilaya) {
       setDeliveryPrice(null);
@@ -66,7 +87,6 @@ export default function FinalizeOrder() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
-
     setLoading(true);
     try {
       await axios.post(`${API_BASE_URL}/orders/create`, {
@@ -74,16 +94,13 @@ export default function FinalizeOrder() {
         deliveryPrice,
         items: cartItems,
       });
-
       localStorage.removeItem("cart");
       window.dispatchEvent(new Event("cartUpdated"));
-
-      toast.success("Commande passée avec succès !");
+      toast.success("Order placed successfully!");
       setIsSuccess(true);
-
-      setTimeout(() => navigate("/products"), 4000);  // /products route still maps to the phones page
+      setTimeout(() => navigate("/products"), 4000);
     } catch (err) {
-      toast.error(err.response?.data?.message || "Erreur lors de la commande");
+      toast.error(err.response?.data?.message || "Failed to place order. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -93,184 +110,254 @@ export default function FinalizeOrder() {
 
   if (isSuccess) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-5 py-12">
-        <div className="bg-white rounded-3xl shadow-2xl p-10 md:p-16 max-w-md text-center">
-          <CheckCircle className="w-24 h-24 mx-auto text-green-600 mb-6" />
-          <h1 className="text-4xl font-light mb-4">Commande Confirmée !</h1>
-          <p className="text-lg text-stone-600">Nous vous contacterons bientôt.</p>
+      <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: "20px" }}>
+        <div style={{ background: "rgba(15,23,42,.85)", border: "1px solid rgba(139,92,246,.3)", borderRadius: 24, padding: "60px 48px", maxWidth: 420, textAlign: "center", backdropFilter: "blur(16px)" }}>
+          <CheckCircle style={{ width: 80, height: 80, color: "#8B5CF6", margin: "0 auto 24px" }} />
+          <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 36, color: "#fff", margin: "0 0 12px" }}>
+            Order Confirmed!
+          </h1>
+          <p style={{ fontSize: 16, color: "#94A3B8", margin: 0 }}>We'll contact you shortly.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen pt-24 pb-32 px-5 lg:px-12">
-      <div className="max-w-5xl mx-auto">
-        <Link to="/cart" className="inline-flex items-center gap-2 text-stone-600 mb-8 hover:text-black transition">
-          <ArrowLeft size={28} />
-          <span className="text-xl font-light">Retour au panier</span>
+    <div style={{ minHeight: "100vh", paddingTop: 96, paddingBottom: 80, paddingLeft: 20, paddingRight: 20 }}>
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+
+        <Link
+          to="/cart"
+          style={{ display: "inline-flex", alignItems: "center", gap: 8, color: "#94A3B8", textDecoration: "none", marginBottom: 32, fontSize: 16, fontFamily: "'Space Grotesk'" }}
+        >
+          <ArrowLeft size={22} />
+          Back to Cart
         </Link>
 
-        <h1 className="text-4xl sm:text-5xl font-light mb-10">Finaliser votre commande</h1>
+        <h1 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(28px,5vw,52px)", color: "#fff", margin: "0 0 40px", letterSpacing: "-.02em" }}>
+          Finalize Your Order
+        </h1>
 
-        <div className="grid lg:grid-cols-5 gap-12">
-          {/* Form */}
-          <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl p-8 border border-stone-100">
-              <form onSubmit={handleSubmit} className="space-y-6">
-                
-                <input 
-                  type="text" 
-                  placeholder="Nom complet *" 
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 32, alignItems: "start" }}>
+
+          {/* Form Card */}
+          <div style={{ gridColumn: "span 2", background: "rgba(15,23,42,.8)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, padding: 36, backdropFilter: "blur(16px)" }}>
+            <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 20, color: "#fff", margin: "0 0 28px", letterSpacing: ".01em" }}>
+              Your Information
+            </h2>
+
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
+
+              <div>
+                <label style={labelStyle}>FULL NAME *</label>
+                <input
+                  type="text"
+                  placeholder="Your full name"
                   required
-                  value={form.customerName} 
-                  onChange={e => setForm({...form, customerName: e.target.value})}
-                  className="w-full p-5 border border-stone-200 rounded-xl text-lg focus:border-black outline-none"
+                  value={form.customerName}
+                  onChange={e => setForm({ ...form, customerName: e.target.value })}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = "rgba(139,92,246,.6)")}
+                  onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
                 />
+              </div>
 
-                <input 
-                  type="tel" 
-                  placeholder="Numéro de téléphone *" 
+              <div>
+                <label style={labelStyle}>PHONE NUMBER *</label>
+                <input
+                  type="tel"
+                  placeholder="Your phone number"
                   required
-                  value={form.phone} 
-                  onChange={e => setForm({...form, phone: e.target.value})}
-                  className="w-full p-5 border border-stone-200 rounded-xl text-lg focus:border-black outline-none"
+                  value={form.phone}
+                  onChange={e => setForm({ ...form, phone: e.target.value })}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = "rgba(139,92,246,.6)")}
+                  onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
                 />
+              </div>
 
-                {/* Email Field - Now Required */}
-                <input 
-                  type="email" 
-                  placeholder="Adresse email *" 
+              <div>
+                <label style={labelStyle}>EMAIL ADDRESS *</label>
+                <input
+                  type="email"
+                  placeholder="Your email address"
                   required
-                  value={form.customerEmail} 
-                  onChange={e => setForm({...form, customerEmail: e.target.value})}
-                  className="w-full p-5 border border-stone-200 rounded-xl text-lg focus:border-black outline-none"
+                  value={form.customerEmail}
+                  onChange={e => setForm({ ...form, customerEmail: e.target.value })}
+                  style={inputStyle}
+                  onFocus={e => (e.target.style.borderColor = "rgba(139,92,246,.6)")}
+                  onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
                 />
+              </div>
 
-                <div>
-                  <label className="block mb-2 font-medium text-stone-700">Wilaya *</label>
-                  <select 
-                    required 
-                    value={form.wilaya} 
-                    onChange={e => setForm({...form, wilaya: e.target.value, desk: ""})}
-                    className="w-full p-5 border border-stone-200 rounded-xl text-lg focus:border-black outline-none cursor-pointer"
-                  >
-                    <option value="">Sélectionnez votre wilaya</option>
-                    {availableWilayas.map(w => (
-                      <option key={w.wilaya} value={w.wilaya}>{w.wilaya}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block mb-3 font-medium text-stone-700">Type de livraison</label>
-                  <div className="grid grid-cols-2 gap-4">
-                    <button 
-                      type="button" 
-                      onClick={() => setForm({...form, deliveryType: "desk", desk: ""})}
-                      className={`cursor-pointer p-5 rounded-xl border-2 transition-all ${
-                        form.deliveryType === "desk" 
-                          ? "border-blue-800 bg-blue-200 text-white" 
-                          : "border-stone-200 hover:border-blue-800"
-                      }`}
-                    >
-                      Point de livraison
-                    </button>
-                    <button 
-                      type="button" 
-                      onClick={() => setForm({...form, deliveryType: "home"})}
-                      className={`cursor-pointer p-5 rounded-xl border-2 transition-all ${
-                        form.deliveryType === "home" 
-                          ? "border-blue-800 bg-blue-200 text-white" 
-                          : "border-stone-200 hover:border-blue-800"
-                      }`}
-                    >
-                      À domicile
-                    </button>
-                  </div>
-                </div>
-
-                {form.deliveryType === "desk" && desks.length > 0 && (
-                  <select 
-                    required 
-                    value={form.desk} 
-                    onChange={e => setForm({...form, desk: e.target.value})}
-                    className="w-full p-5 border border-stone-200 rounded-xl text-lg focus:border-black outline-none cursor-pointer"
-                  >
-                    <option value="">Choisir un point de livraison</option>
-                    {desks.map((d, i) => (
-                      <option key={i} value={d.name}>{d.name}</option>
-                    ))}
-                  </select>
-                )}
-
-                {form.deliveryType === "home" && (
-                  <textarea 
-                    placeholder="Adresse complète (rue, bâtiment, étage...)" 
-                    required 
-                    rows={4}
-                    value={form.address} 
-                    onChange={e => setForm({...form, address: e.target.value})}
-                    className="w-full p-5 border border-stone-200 rounded-xl text-lg focus:border-black outline-none resize-y"
-                  />
-                )}
-
-                <button
-                  type="submit"
-                  disabled={loading || !form.wilaya || (form.deliveryType === "desk" && !form.desk)}
-                  className="cursor-pointer w-full py-6 bg-black hover:bg-blue-800 text-white text-xl font-medium rounded-xl disabled:opacity-50 transition-all"
+              <div>
+                <label style={labelStyle}>WILAYA *</label>
+                <select
+                  required
+                  value={form.wilaya}
+                  onChange={e => setForm({ ...form, wilaya: e.target.value, desk: "" })}
+                  style={{ ...inputStyle, cursor: "pointer" }}
+                  onFocus={e => (e.target.style.borderColor = "rgba(139,92,246,.6)")}
+                  onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
                 >
-                  {loading 
-                    ? "Commande en cours..." 
-                    : `Confirmer la commande - ${totalWithDelivery.toLocaleString()} DA`
-                  }
-                </button>
-              </form>
-            </div>
+                  <option value="" style={{ background: "#0f172a" }}>Select your wilaya</option>
+                  {availableWilayas.map(w => (
+                    <option key={w.wilaya} value={w.wilaya} style={{ background: "#0f172a" }}>{w.wilaya}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={labelStyle}>DELIVERY TYPE</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                  {[
+                    { value: "desk", label: "Pickup Point" },
+                    { value: "home", label: "Home Delivery" },
+                  ].map(opt => (
+                    <button
+                      key={opt.value}
+                      type="button"
+                      onClick={() => setForm({ ...form, deliveryType: opt.value, desk: "" })}
+                      style={{
+                        padding: "14px 16px",
+                        borderRadius: 12,
+                        border: form.deliveryType === opt.value
+                          ? "1px solid rgba(139,92,246,.7)"
+                          : "1px solid rgba(255,255,255,.1)",
+                        background: form.deliveryType === opt.value
+                          ? "rgba(139,92,246,.15)"
+                          : "rgba(255,255,255,.03)",
+                        color: form.deliveryType === opt.value ? "#c4b5fd" : "#94A3B8",
+                        fontFamily: "'Space Grotesk'",
+                        fontWeight: 600,
+                        fontSize: 15,
+                        cursor: "pointer",
+                        transition: "all .2s",
+                      }}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {form.deliveryType === "desk" && desks.length > 0 && (
+                <div>
+                  <label style={labelStyle}>PICKUP POINT *</label>
+                  <select
+                    required
+                    value={form.desk}
+                    onChange={e => setForm({ ...form, desk: e.target.value })}
+                    style={{ ...inputStyle, cursor: "pointer" }}
+                    onFocus={e => (e.target.style.borderColor = "rgba(139,92,246,.6)")}
+                    onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
+                  >
+                    <option value="" style={{ background: "#0f172a" }}>Choose a pickup point</option>
+                    {desks.map((d, i) => (
+                      <option key={i} value={d.name} style={{ background: "#0f172a" }}>{d.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {form.deliveryType === "home" && (
+                <div>
+                  <label style={labelStyle}>FULL ADDRESS *</label>
+                  <textarea
+                    placeholder="Street, building, floor..."
+                    required
+                    rows={4}
+                    value={form.address}
+                    onChange={e => setForm({ ...form, address: e.target.value })}
+                    style={{ ...inputStyle, resize: "vertical", lineHeight: 1.6 }}
+                    onFocus={e => (e.target.style.borderColor = "rgba(139,92,246,.6)")}
+                    onBlur={e => (e.target.style.borderColor = "rgba(255,255,255,.1)")}
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading || !form.wilaya || (form.deliveryType === "desk" && !form.desk)}
+                style={{
+                  width: "100%",
+                  padding: "18px",
+                  background: loading || !form.wilaya || (form.deliveryType === "desk" && !form.desk)
+                    ? "rgba(139,92,246,.3)"
+                    : "linear-gradient(135deg,#8B5CF6,#6C2BD9)",
+                  color: "#fff",
+                  fontFamily: "'Space Grotesk'",
+                  fontWeight: 700,
+                  fontSize: 17,
+                  borderRadius: 14,
+                  border: "none",
+                  cursor: loading || !form.wilaya || (form.deliveryType === "desk" && !form.desk) ? "not-allowed" : "pointer",
+                  boxShadow: "0 16px 40px -12px rgba(108,43,217,.6)",
+                  transition: "all .25s",
+                  marginTop: 8,
+                }}
+              >
+                {loading
+                  ? "Commande en cours..."
+                  : `Confirm Order — ${totalWithDelivery.toLocaleString()} DA`}
+              </button>
+            </form>
           </div>
 
-          {/* Order Summary */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl p-8 border border-stone-100 sticky top-24">
-              <h2 className="text-2xl font-light mb-8">Résumé de la commande</h2>
-              
+          {/* Order Summary Card */}
+          <div style={{ background: "rgba(15,23,42,.8)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, padding: 28, backdropFilter: "blur(16px)", position: "sticky", top: 96 }}>
+            <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 20, color: "#fff", margin: "0 0 24px", letterSpacing: ".01em" }}>
+              Order Summary
+            </h2>
+
+            <div style={{ display: "flex", flexDirection: "column", gap: 0 }}>
               {cartItems.map((item, i) => (
-                <div key={i} className="flex gap-4 py-5 border-b last:border-0 items-start">
-                  <img 
-                    src={item.image} 
-                    alt={item.name} 
-                    className="w-20 h-20 object-cover rounded-xl" 
-                  />
-                  <div className="flex-1">
-                    <p className="font-medium leading-tight">{item.name}</p>
-                    <p className="text-sm text-stone-500 mt-1">Quantité : {item.quantity}</p>
+                <div
+                  key={i}
+                  style={{
+                    display: "flex",
+                    gap: 14,
+                    padding: "16px 0",
+                    borderBottom: i < cartItems.length - 1 ? "1px solid rgba(255,255,255,.06)" : "none",
+                    alignItems: "center",
+                  }}
+                >
+                  <div style={{ width: 64, height: 64, borderRadius: 12, overflow: "hidden", flexShrink: 0 }}>
+                    <img src={item.image} alt={item.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
                   </div>
-                  <p className="font-medium text-blue-700 whitespace-nowrap">
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 600, fontSize: 15, color: "#fff", margin: "0 0 4px", lineHeight: 1.3 }}>
+                      {item.name}
+                    </p>
+                    <p style={{ fontSize: 13, color: "#64748B", margin: 0 }}>Qty: {item.quantity}</p>
+                  </div>
+                  <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 15, color: "#8B5CF6", margin: 0, whiteSpace: "nowrap" }}>
                     {(item.price * item.quantity).toLocaleString()} DA
                   </p>
                 </div>
               ))}
+            </div>
 
-              <div className="mt-8 space-y-4 text-lg">
-                <div className="flex justify-between">
-                  <span>Sous-total</span>
-                  <span>{subtotal.toLocaleString()} DA</span>
-                </div>
-                
-                {deliveryPrice !== null && (
-                  <div className="flex justify-between">
-                    <span>Livraison ({form.wilaya})</span>
-                    <span>{deliveryPrice.toLocaleString()} DA</span>
-                  </div>
-                )}
+            <div style={{ marginTop: 20, paddingTop: 20, borderTop: "1px solid rgba(255,255,255,.08)", display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, color: "#94A3B8" }}>
+                <span>Subtotal</span>
+                <span style={{ color: "#fff", fontWeight: 600 }}>{subtotal.toLocaleString()} DA</span>
+              </div>
 
-                <div className="flex justify-between text-2xl font-medium pt-6 border-t border-stone-200">
-                  <span>Total</span>
-                  <span className="text-blue-700">{totalWithDelivery.toLocaleString()} DA</span>
+              {deliveryPrice !== null && (
+                <div style={{ display: "flex", justifyContent: "space-between", fontSize: 15, color: "#94A3B8" }}>
+                  <span>Delivery ({form.wilaya})</span>
+                  <span style={{ color: "#fff", fontWeight: 600 }}>{deliveryPrice.toLocaleString()} DA</span>
                 </div>
+              )}
+
+              <div style={{ display: "flex", justifyContent: "space-between", paddingTop: 16, borderTop: "1px solid rgba(255,255,255,.08)", fontSize: 20, fontWeight: 700 }}>
+                <span style={{ color: "#fff" }}>Total</span>
+                <span style={{ color: "#8B5CF6" }}>{totalWithDelivery.toLocaleString()} DA</span>
               </div>
             </div>
           </div>
+
         </div>
       </div>
     </div>

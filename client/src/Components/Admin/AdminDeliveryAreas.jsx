@@ -172,24 +172,26 @@ export default function AdminDeliveryAreas() {
       <AnimatePresence>
         {showModal && (
           <motion.div
-            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.75)", zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center", padding: 16, backdropFilter: "blur(8px)" }}
+            style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.8)", zIndex: 50, display: "flex", alignItems: "center", justifyContent: "center", padding: 16, backdropFilter: "blur(8px)" }}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={resetForm}
           >
             <motion.div
-              style={{ background: "rgba(15,23,42,.98)", border: "1px solid rgba(255,255,255,.1)", borderRadius: "24px 24px 0 0", maxHeight: "92vh", overflowY: "auto", width: "100%", maxWidth: 640 }}
-              initial={{ y: "100%" }}
-              animate={{ y: 0 }}
-              exit={{ y: "100%" }}
+              style={{ background: "#0D1526", border: "1px solid rgba(255,255,255,.1)", borderRadius: 24, maxHeight: "85vh", display: "flex", flexDirection: "column", width: "100%", maxWidth: 640, boxShadow: "0 24px 80px rgba(0,0,0,.6)" }}
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              transition={{ type: "spring", damping: 28, stiffness: 300 }}
               onClick={e => e.stopPropagation()}
             >
-              <div style={{ padding: "32px 28px" }}>
-                <div style={{ width: 40, height: 4, background: "rgba(255,255,255,.2)", borderRadius: 4, margin: "0 auto 24px" }} />
-                <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 24, color: "#fff", textAlign: "center", margin: "0 0 28px" }}>
+              <div style={{ padding: "22px 28px 18px", borderBottom: "1px solid rgba(255,255,255,.07)", flexShrink: 0 }}>
+                <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 24, color: "#fff", margin: 0 }}>
                   {editingId ? "Edit Wilaya" : "Add New Wilaya"}
                 </h2>
+              </div>
+              <div style={{ overflowY: "auto", padding: "24px 28px" }}>
 
                 <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 20 }}>
                   {!editingId && (

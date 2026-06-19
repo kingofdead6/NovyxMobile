@@ -82,9 +82,10 @@ export default function Navbar() {
       ]
     : [
         { label: "Home", to: "/" },
-        { label: "Phones", to: "/products" },
-        { label: "Accessories", to: "/products?category=Accessories" },
-        { label: "Contact", to: "/sell-us-something" },
+        { label: "Phones", to: "/phones" },
+        { label: "Accessories", to: "/accessories" },
+        { label: "Cases", to: "/cases" },
+        { label: "Contact", to: "/contact" },
       ];
 
   return (
@@ -114,7 +115,7 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <nav style={{ display: "flex", alignItems: "center", gap: 6 }} className="hidden md:flex">
             {navItems.map((n) => {
-              const active = location.pathname === n.to;
+              const active = n.to === "/" ? location.pathname === "/" : location.pathname.startsWith(n.to);
               return (
                 <Link key={n.to} to={n.to} style={{
                   fontFamily: "'Manrope'", fontWeight: 600, fontSize: 14.5,

@@ -22,8 +22,13 @@ import FinalizeOrder from "./Components/Products/FinalizeOrder";
 import NotFound from "./Pages/NotFound";
 import ScrollToTop from "./Components/Shared/ScrollToTop";
 import AdminGallery from "./Components/Admin/AdminGallery";
-import ContactPage from "./Pages/Contact.tsx";
 import AdminSellRequests from "./Components/Admin/AdminSellRequests";
+import PhonesPage from "./Pages/PhonesPage";
+import AccessoriesPage from "./Pages/AccessoriesPage";
+import CasesPage from "./Pages/CasesPage";
+import ContactPage from "./Pages/ContactPage";
+import SellPage from "./Pages/SellPage";
+import RepairPage from "./Pages/RepairPage";
 import AdminContactMessages from "./Components/Admin/AdminContactMessages.jsx";
 import AdminRepairRequests from "./Components/Admin/AdminRepairRequests.jsx";
 import AdminPhoneBrands from "./Components/Admin/AdminPhoneBrands.jsx";
@@ -51,12 +56,19 @@ function App() {
           <Routes>
             {/* Public Routes */}
             <Route path="/" element={<HomePage />} />
+            <Route path="/phones" element={<PhonesPage />} />
+            <Route path="/accessories" element={<AccessoriesPage />} />
+            <Route path="/cases" element={<CasesPage />} />
+            <Route path="/contact" element={<ContactPage />} />
+            <Route path="/sell" element={<SellPage />} />
+            <Route path="/repair" element={<RepairPage />} />
             <Route path="/products" element={<ProductsPage />} />
             <Route path="/product/:id" element={<ProductDetailsPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<FinalizeOrder />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/sell-us-something" element={<ContactPage />} />
+            {/* Legacy redirect for old sell link */}
+            <Route path="/sell-us-something" element={<SellPage />} />
 
             {/* Protected Admin Routes */}
             <Route element={<ProtectedRoute />}>

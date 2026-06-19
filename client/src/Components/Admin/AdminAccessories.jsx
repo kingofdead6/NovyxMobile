@@ -8,6 +8,49 @@ import { Plus, Search, Trash2, Edit, X } from "lucide-react";
 const getToken = () => localStorage.getItem("token") || sessionStorage.getItem("token");
 const authH = () => ({ Authorization: `Bearer ${getToken()}` });
 
+const S = {
+  page: { minHeight: "100vh", padding: "56px 24px 80px" },
+  inner: { maxWidth: 1280, margin: "0 auto" },
+  header: { display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 36, flexWrap: "wrap", gap: 16 },
+  h1: { fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: "clamp(28px,4vw,52px)", color: "#fff", margin: 0, letterSpacing: "-.02em" },
+  addBtn: { display: "flex", alignItems: "center", gap: 9, padding: "13px 24px", background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff", border: "none", borderRadius: 14, fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 15, cursor: "pointer", boxShadow: "0 4px 20px rgba(108,43,217,.35)", whiteSpace: "nowrap" },
+  toolbar: { display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 36 },
+  searchWrap: { position: "relative", flex: "1 1 220px" },
+  searchIcon: { position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: "#64748B", pointerEvents: "none" },
+  searchInput: { width: "100%", padding: "13px 14px 13px 42px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, color: "#fff", fontSize: 15, outline: "none", fontFamily: "inherit", boxSizing: "border-box" },
+  select: { padding: "13px 14px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, color: "#fff", fontSize: 15, outline: "none", minWidth: 180 },
+  grid: { display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(220px,1fr))", gap: 18 },
+  card: { background: "rgba(15,23,42,.85)", border: "1px solid rgba(255,255,255,.08)", borderRadius: 20, overflow: "hidden", transition: "transform .2s,border-color .2s,box-shadow .2s" },
+  cardImg: { width: "100%", aspectRatio: "1/1", objectFit: "cover", display: "block", background: "rgba(139,92,246,.07)" },
+  cardBody: { padding: "14px 16px 16px" },
+  catLabel: { fontSize: 11, color: "#6D28D9", fontFamily: "'JetBrains Mono'", margin: "0 0 4px", fontWeight: 600 },
+  cardName: { fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 15, color: "#E2E8F0", margin: 0, lineHeight: 1.3 },
+  price: { fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 18, color: "#fff", marginTop: 8, marginBottom: 0 },
+  muted: { fontSize: 12, color: "#64748B", marginTop: 2 },
+  actionRow: { display: "flex", gap: 8, marginTop: 12 },
+  editBtn: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "9px", background: "rgba(139,92,246,.15)", border: "1px solid rgba(139,92,246,.3)", color: "#A78BFA", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer" },
+  delBtn: { flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 5, padding: "9px", background: "rgba(239,68,68,.1)", border: "1px solid rgba(239,68,68,.3)", color: "#FCA5A5", borderRadius: 10, fontSize: 13, fontWeight: 600, cursor: "pointer" },
+  overlay: { position: "fixed", inset: 0, background: "rgba(0,0,0,.8)", zIndex: 50, display: "flex", alignItems: "flex-end", justifyContent: "center" },
+  modal: { background: "#0D1526", border: "1px solid rgba(255,255,255,.1)", borderRadius: "24px 24px 0 0", width: "100%", maxWidth: 560, maxHeight: "90vh", display: "flex", flexDirection: "column", boxShadow: "0 -20px 60px rgba(0,0,0,.5)" },
+  modalHeader: { padding: "24px 28px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,.07)" },
+  modalTitle: { fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, color: "#fff", margin: 0 },
+  closeBtn: { background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.1)", color: "#94A3B8", borderRadius: 10, padding: 6, cursor: "pointer", display: "flex" },
+  formScroll: { overflowY: "auto", padding: "24px 28px", display: "flex", flexDirection: "column", gap: 14 },
+  input: { padding: "14px 16px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, color: "#fff", fontSize: 15, outline: "none", fontFamily: "inherit", width: "100%", boxSizing: "border-box" },
+  row2: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 },
+  textarea: { padding: "14px 16px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", borderRadius: 12, color: "#fff", fontSize: 15, outline: "none", fontFamily: "inherit", width: "100%", minHeight: 80, resize: "vertical", boxSizing: "border-box" },
+  fileZone: { display: "block", padding: "18px 14px", border: "2px dashed rgba(139,92,246,.4)", borderRadius: 12, color: "#8B5CF6", fontSize: 14, cursor: "pointer", textAlign: "center" },
+  thumbGrid: { display: "grid", gridTemplateColumns: "repeat(4,1fr)", gap: 8, marginTop: 10 },
+  thumb: { position: "relative" },
+  thumbImg: { width: "100%", aspectRatio: "1/1", objectFit: "cover", borderRadius: 10 },
+  thumbX: { position: "absolute", top: -5, right: -5, background: "#EF4444", border: "none", color: "#fff", borderRadius: "50%", width: 20, height: 20, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", padding: 0 },
+  btnRow: { display: "flex", gap: 12 },
+  submitBtn: { flex: 1, padding: "15px", background: "linear-gradient(135deg,#8B5CF6,#6C2BD9)", color: "#fff", border: "none", borderRadius: 12, fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, cursor: "pointer" },
+  cancelBtn: { flex: 1, padding: "15px", background: "rgba(255,255,255,.05)", border: "1px solid rgba(255,255,255,.1)", color: "#94A3B8", borderRadius: 12, fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, cursor: "pointer" },
+  sectionLabel: { fontSize: 12, color: "#64748B", fontFamily: "'JetBrains Mono'", fontWeight: 600, textTransform: "uppercase", letterSpacing: ".06em", marginBottom: 8, display: "block" },
+  empty: { textAlign: "center", color: "#334155", fontSize: 20, paddingTop: 80, fontFamily: "'Space Grotesk'" },
+};
+
 export default function AdminAccessories() {
   const [items, setItems] = useState([]);
   const [filtered, setFiltered] = useState([]);
@@ -18,65 +61,42 @@ export default function AdminAccessories() {
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [saving, setSaving] = useState(false);
-
   const [form, setForm] = useState({ name: "", category: "", price: "", stock: "", brand: "", description: "", images: [] });
 
-  useEffect(() => {
-    fetchItems();
-    fetchCategories();
-  }, []);
+  useEffect(() => { fetchItems(); fetchCategories(); }, []);
 
   const fetchCategories = async () => {
-    try {
-      const res = await axios.get(`${API_BASE_URL}/accessories-categories`, { headers: authH() });
-      setCategories(res.data);
-    } catch { /* silent */ }
+    try { const res = await axios.get(`${API_BASE_URL}/accessories-categories`, { headers: authH() }); setCategories(res.data); } catch { /* silent */ }
   };
 
   const fetchItems = async () => {
     setLoading(true);
-    try {
-      const res = await axios.get(`${API_BASE_URL}/accessories`, { headers: authH() });
-      setItems(res.data);
-    } catch {
-      toast.error("Error loading accessories");
-    } finally {
-      setLoading(false);
-    }
+    try { const res = await axios.get(`${API_BASE_URL}/accessories`, { headers: authH() }); setItems(res.data); }
+    catch { toast.error("Erreur de chargement"); }
+    finally { setLoading(false); }
   };
 
   useEffect(() => {
     setFiltered(items.filter(p => {
-      const matchSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchCat = !selectedCat || p.category?._id === selectedCat || p.category === selectedCat;
-      return matchSearch && matchCat;
+      const ms = p.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const mc = !selectedCat || p.category?._id === selectedCat || p.category === selectedCat;
+      return ms && mc;
     }));
   }, [items, searchTerm, selectedCat]);
 
-  const resetForm = () => {
-    setForm({ name: "", category: "", price: "", stock: "", brand: "", description: "", images: [] });
-    setEditingId(null);
-    setShowModal(false);
-  };
+  const resetForm = () => { setForm({ name: "", category: "", price: "", stock: "", brand: "", description: "", images: [] }); setEditingId(null); setShowModal(false); };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSaving(true);
+    e.preventDefault(); setSaving(true);
     const fd = new FormData();
     ["name", "category", "price", "stock", "brand", "description"].forEach(k => fd.append(k, form[k]));
     form.images.filter(i => i.file).forEach(i => fd.append("images", i.file));
     try {
-      if (editingId) {
-        await axios.put(`${API_BASE_URL}/accessories/${editingId}`, fd, { headers: authH() });
-        toast.success("Accessory updated");
-      } else {
-        await axios.post(`${API_BASE_URL}/accessories`, fd, { headers: authH() });
-        toast.success("Accessory created");
-      }
+      if (editingId) { await axios.put(`${API_BASE_URL}/accessories/${editingId}`, fd, { headers: authH() }); toast.success("Accessoire mis à jour"); }
+      else { await axios.post(`${API_BASE_URL}/accessories`, fd, { headers: authH() }); toast.success("Accessoire créé"); }
       resetForm(); fetchItems();
-    } catch (err) {
-      toast.error(err.response?.data?.message || "Error saving");
-    } finally { setSaving(false); }
+    } catch (err) { toast.error(err.response?.data?.message || "Erreur"); }
+    finally { setSaving(false); }
   };
 
   const handleEdit = (item) => {
@@ -86,99 +106,102 @@ export default function AdminAccessories() {
   };
 
   const handleDelete = async (id) => {
-    if (!confirm("Delete this accessory?")) return;
-    try {
-      await axios.delete(`${API_BASE_URL}/accessories/${id}`, { headers: authH() });
-      setItems(p => p.filter(x => x._id !== id));
-      toast.success("Deleted");
-    } catch { toast.error("Error deleting"); }
+    if (!confirm("Supprimer cet accessoire ?")) return;
+    try { await axios.delete(`${API_BASE_URL}/accessories/${id}`, { headers: authH() }); setItems(p => p.filter(x => x._id !== id)); toast.success("Supprimé"); }
+    catch { toast.error("Erreur"); }
   };
 
   return (
-    <div className="min-h-screen pb-20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-8">
-        <h1 className="text-4xl sm:text-5xl font-light mb-8">Accessories</h1>
-
-        <div className="flex flex-col sm:flex-row gap-4 mb-8">
-          <button onClick={() => setShowModal(true)} className="bg-black text-white px-6 py-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-gray-800 transition w-full sm:w-auto">
-            <Plus size={22} /> New Accessory
-          </button>
-          <div className="flex-1 flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input type="text" placeholder="Search..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="w-full pl-11 py-4 border border-gray-300 rounded-2xl focus:border-black outline-none" />
-            </div>
-            <select value={selectedCat} onChange={e => setSelectedCat(e.target.value)} className="w-full sm:w-52 py-4 px-4 border border-gray-300 rounded-2xl focus:border-black outline-none">
-              <option value="">All categories</option>
-              {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
-            </select>
-          </div>
+    <div style={S.page}>
+      <div style={S.inner}>
+        <div style={S.header}>
+          <h1 style={S.h1}>Accessoires</h1>
+          <button style={S.addBtn} onClick={() => setShowModal(true)}><Plus size={20} /> Nouveau</button>
         </div>
 
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {filtered.map(item => (
-            <div key={item._id} className="bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all">
-              <div className="aspect-square bg-gray-100">
-                <img src={item.images?.[0]?.url || "/placeholder.jpg"} alt={item.name} className="w-full h-full object-cover" />
-              </div>
-              <div className="p-4">
-                <p className="text-xs text-gray-400">{item.category?.name || ""}</p>
-                <h3 className="font-semibold text-sm line-clamp-2 mt-0.5">{item.name}</h3>
-                <p className="text-base font-medium mt-1">{item.price?.toLocaleString()} DA</p>
-                <p className="text-xs text-gray-400">Stock: {item.stock ?? 0}</p>
-                <div className="flex gap-2 mt-3">
-                  <button onClick={() => handleEdit(item)} className="flex-1 py-2.5 bg-black text-white rounded-xl text-xs font-medium"><Edit size={13} className="inline mr-1" />Edit</button>
-                  <button onClick={() => handleDelete(item._id)} className="flex-1 py-2.5 border border-red-400 text-red-600 rounded-xl text-xs font-medium"><Trash2 size={13} className="inline mr-1" />Del</button>
+        <div style={S.toolbar}>
+          <div style={S.searchWrap}>
+            <Search style={S.searchIcon} size={17} />
+            <input style={S.searchInput} placeholder="Rechercher..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
+          </div>
+          <select style={S.select} value={selectedCat} onChange={e => setSelectedCat(e.target.value)}>
+            <option value="">Toutes les catégories</option>
+            {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
+          </select>
+        </div>
+
+        {filtered.length === 0 && !loading && <p style={S.empty}>Aucun accessoire trouvé</p>}
+
+        <div style={S.grid}>
+          {filtered.map((item, i) => (
+            <motion.div key={item._id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.04 }}
+              style={S.card}
+              onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(139,92,246,.35)"; e.currentTarget.style.boxShadow = "0 12px 40px rgba(0,0,0,.4)"; }}
+              onMouseLeave={e => { e.currentTarget.style.transform = ""; e.currentTarget.style.borderColor = "rgba(255,255,255,.08)"; e.currentTarget.style.boxShadow = ""; }}>
+              <img src={item.images?.[0]?.url || "/placeholder.jpg"} alt={item.name} style={S.cardImg} />
+              <div style={S.cardBody}>
+                <p style={S.catLabel}>{item.category?.name?.toUpperCase() || ""}</p>
+                <p style={S.cardName}>{item.name}</p>
+                {item.brand && <p style={{ fontSize: 12, color: "#64748B", margin: "3px 0 0" }}>{item.brand}</p>}
+                <p style={S.price}>{item.price?.toLocaleString()} DA</p>
+                <p style={S.muted}>Stock: {item.stock ?? 0}</p>
+                <div style={S.actionRow}>
+                  <button style={S.editBtn} onClick={() => handleEdit(item)}><Edit size={13} /> Modifier</button>
+                  <button style={S.delBtn} onClick={() => handleDelete(item._id)}><Trash2 size={13} /> Suppr.</button>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
-        {filtered.length === 0 && !loading && <p className="text-center text-gray-500 py-20">No accessories found</p>}
       </div>
 
       <AnimatePresence>
         {showModal && (
-          <div className="fixed inset-0 bg-black/70 z-50 flex justify-center p-4">
-            <motion.div initial={{ y: 100, opacity: 0 }} animate={{ y: 0, opacity: 1 }} exit={{ y: 100, opacity: 0 }}
-              className="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-lg max-h-[85vh] flex flex-col shadow-lg">
-              <div className="p-6 pb-4 flex justify-between items-center border-b">
-                <h2 className="text-xl font-semibold">{editingId ? "Edit Accessory" : "New Accessory"}</h2>
-                <button onClick={resetForm} className="text-2xl text-gray-400">×</button>
+          <motion.div style={S.overlay} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <motion.div style={S.modal} initial={{ y: 80 }} animate={{ y: 0 }} exit={{ y: 80 }} transition={{ type: "spring", damping: 28, stiffness: 300 }}>
+              <div style={S.modalHeader}>
+                <h2 style={S.modalTitle}>{editingId ? "Modifier l'accessoire" : "Nouvel accessoire"}</h2>
+                <button style={S.closeBtn} onClick={resetForm}><X size={18} /></button>
               </div>
-              <div className="overflow-y-auto px-6 py-5">
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <input required placeholder="Name *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="w-full p-4 border rounded-2xl" />
-                  <select required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} className="w-full p-4 border rounded-2xl">
-                    <option value="">Category *</option>
+              <div style={S.formScroll}>
+                <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+                  <input required placeholder="Nom *" value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} style={S.input} />
+                  <select required value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} style={S.input}>
+                    <option value="">Catégorie *</option>
                     {categories.map(c => <option key={c._id} value={c._id}>{c.name}</option>)}
                   </select>
-                  <div className="grid grid-cols-2 gap-3">
-                    <input required type="number" placeholder="Price (DA) *" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} className="p-4 border rounded-2xl" />
-                    <input type="number" placeholder="Stock" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} className="p-4 border rounded-2xl" />
+                  <div style={S.row2}>
+                    <input required type="number" placeholder="Prix (DA) *" value={form.price} onChange={e => setForm({ ...form, price: e.target.value })} style={S.input} />
+                    <input type="number" placeholder="Stock" value={form.stock} onChange={e => setForm({ ...form, stock: e.target.value })} style={S.input} />
                   </div>
-                  <input placeholder="Brand" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} className="w-full p-4 border rounded-2xl" />
-                  <textarea placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} className="w-full p-4 border rounded-2xl h-20 resize-y" />
+                  <input placeholder="Marque" value={form.brand} onChange={e => setForm({ ...form, brand: e.target.value })} style={S.input} />
+                  <textarea placeholder="Description" value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} style={S.textarea} />
                   <div>
-                    <p className="font-medium mb-2">Images (max 8)</p>
-                    <input type="file" multiple accept="image/*" onChange={e => { const newImgs = Array.from(e.target.files).map(f => ({ file: f, preview: URL.createObjectURL(f) })); setForm(p => ({ ...p, images: [...p.images, ...newImgs].slice(0, 8) })); }} className="w-full p-3 border-2 border-dashed border-gray-300 rounded-2xl" />
-                    <div className="grid grid-cols-4 gap-2 mt-3">
-                      {form.images.map((img, i) => (
-                        <div key={i} className="relative">
-                          <img src={img.preview || img.url} className="w-full aspect-square object-cover rounded-xl" />
-                          <button type="button" onClick={() => setForm(p => ({ ...p, images: p.images.filter((_, j) => j !== i) }))} className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-0.5"><X size={12} /></button>
-                        </div>
-                      ))}
-                    </div>
+                    <span style={S.sectionLabel}>Images (max 8)</span>
+                    <label style={S.fileZone}>
+                      <input type="file" multiple accept="image/*" style={{ display: "none" }}
+                        onChange={e => { const imgs = Array.from(e.target.files).map(f => ({ file: f, preview: URL.createObjectURL(f) })); setForm(p => ({ ...p, images: [...p.images, ...imgs].slice(0, 8) })); }} />
+                      + Ajouter des images
+                    </label>
+                    {form.images.length > 0 && (
+                      <div style={S.thumbGrid}>
+                        {form.images.map((img, i) => (
+                          <div key={i} style={S.thumb}>
+                            <img src={img.preview || img.url} style={S.thumbImg} />
+                            <button type="button" style={S.thumbX} onClick={() => setForm(p => ({ ...p, images: p.images.filter((_, j) => j !== i) }))}><X size={11} /></button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
-                  <div className="flex gap-3 pt-2">
-                    <button type="submit" disabled={saving} className="flex-1 bg-black text-white py-4 rounded-2xl font-medium disabled:opacity-60">{saving ? "Saving..." : editingId ? "Update" : "Create"}</button>
-                    <button type="button" onClick={resetForm} className="flex-1 py-4 border rounded-2xl font-medium">Cancel</button>
+                  <div style={S.btnRow}>
+                    <button type="submit" disabled={saving} style={{ ...S.submitBtn, opacity: saving ? 0.7 : 1 }}>{saving ? "Sauvegarde..." : editingId ? "Mettre à jour" : "Créer"}</button>
+                    <button type="button" onClick={resetForm} style={S.cancelBtn}>Annuler</button>
                   </div>
                 </form>
               </div>
             </motion.div>
-          </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>

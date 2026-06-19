@@ -18,7 +18,7 @@ export default function CategoriesSection() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    axios.get(`${API_BASE_URL}/categories`)
+    axios.get(`${API_BASE_URL}/phone-brands`)
       .then(r => setCategories(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));

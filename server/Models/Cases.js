@@ -25,6 +25,7 @@ const caseSchema = new mongoose.Schema({
     required: true,
     min: 0,
   },
+  salePrice: { type: Number, default: null, min: 0 },
   stock: {
     type: Number,
     default: 0,

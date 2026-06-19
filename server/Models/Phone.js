@@ -8,6 +8,7 @@ const phoneSchema = new mongoose.Schema({
     required: true,
   },
   price: { type: Number, required: true, min: 0 },
+  salePrice: { type: Number, default: null, min: 0 },
   storage: { type: String, trim: true },
   ram: { type: String, trim: true },
   color: { type: String, trim: true },

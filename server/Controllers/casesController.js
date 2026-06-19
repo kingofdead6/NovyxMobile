@@ -22,7 +22,7 @@ export const getCaseById = asyncHandler(async (req, res) => {
 });
 
 export const createCase = asyncHandler(async (req, res) => {
-  const { name, brand, compatibleModels, material, color, price, stock, description } = req.body;
+  const { name, brand, compatibleModels, material, color, price, salePrice, stock, description } = req.body;
 
   if (!name || !brand || price === undefined) {
     res.status(400);
@@ -46,6 +46,7 @@ export const createCase = asyncHandler(async (req, res) => {
     material: material?.trim() || '',
     color: color?.trim() || '',
     price: Number(price),
+    salePrice: salePrice !== undefined && salePrice !== '' ? Number(salePrice) : null,
     stock: stock !== undefined ? Number(stock) : 0,
     description: description?.trim() || '',
     images,
@@ -61,7 +62,7 @@ export const updateCase = asyncHandler(async (req, res) => {
     throw new Error('Case not found');
   }
 
-  const { name, brand, compatibleModels, material, color, price, stock, description, isActive } = req.body;
+  const { name, brand, compatibleModels, material, color, price, salePrice, stock, description, isActive } = req.body;
   if (name) item.name = name.trim();
   if (brand) item.brand = brand;
   if (compatibleModels !== undefined)
@@ -69,6 +70,7 @@ export const updateCase = asyncHandler(async (req, res) => {
   if (material !== undefined) item.material = material.trim();
   if (color !== undefined) item.color = color.trim();
   if (price !== undefined) item.price = Number(price);
+  if (salePrice !== undefined) item.salePrice = salePrice !== '' && salePrice !== null ? Number(salePrice) : null;
   if (stock !== undefined) item.stock = Number(stock);
   if (description !== undefined) item.description = description.trim();
   if (isActive !== undefined) item.isActive = isActive === 'true' || isActive === true;

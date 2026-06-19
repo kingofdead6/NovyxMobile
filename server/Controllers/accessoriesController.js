@@ -26,7 +26,7 @@ export const getAccessoryById = asyncHandler(async (req, res) => {
 });
 
 export const createAccessory = asyncHandler(async (req, res) => {
-  const { name, category, price, stock, description, brand } = req.body;
+  const { name, category, price, salePrice, stock, description, brand } = req.body;
 
   if (!name || !category || price === undefined) {
     res.status(400);
@@ -45,6 +45,7 @@ export const createAccessory = asyncHandler(async (req, res) => {
     name: name.trim(),
     category,
     price: Number(price),
+    salePrice: salePrice !== undefined && salePrice !== '' ? Number(salePrice) : null,
     stock: stock !== undefined ? Number(stock) : 0,
     description: description?.trim() || '',
     brand: brand?.trim() || '',
@@ -61,10 +62,11 @@ export const updateAccessory = asyncHandler(async (req, res) => {
     throw new Error('Accessory not found');
   }
 
-  const { name, category, price, stock, description, brand, isActive, showOnProductsPage } = req.body;
+  const { name, category, price, salePrice, stock, description, brand, isActive, showOnProductsPage } = req.body;
   if (name) accessory.name = name.trim();
   if (category) accessory.category = category;
   if (price !== undefined) accessory.price = Number(price);
+  if (salePrice !== undefined) accessory.salePrice = salePrice !== '' && salePrice !== null ? Number(salePrice) : null;
   if (stock !== undefined) accessory.stock = Number(stock);
   if (description !== undefined) accessory.description = description.trim();
   if (brand !== undefined) accessory.brand = brand.trim();

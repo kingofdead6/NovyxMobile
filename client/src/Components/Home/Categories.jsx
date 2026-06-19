@@ -94,7 +94,7 @@ export default function CategoriesSection() {
             <div
               key={cat._id}
               className="nv-brand-card"
-              onClick={() => navigate(`/products?category=${encodeURIComponent(cat.name)}`)}
+              onClick={() => navigate(`/phones?category=${encodeURIComponent(cat.name)}`)}
               style={{
                 position: "relative",
                 borderRadius: 24,

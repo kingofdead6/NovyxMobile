@@ -39,7 +39,7 @@ export const getPhoneById = asyncHandler(async (req, res) => {
 });
 
 export const createPhone = asyncHandler(async (req, res) => {
-  const { name, brand, price, storage, ram, color, condition, stock, description } = req.body;
+  const { name, brand, price, salePrice, storage, ram, color, condition, stock, description } = req.body;
 
   if (!name || !brand || price === undefined) {
     res.status(400);
@@ -58,6 +58,7 @@ export const createPhone = asyncHandler(async (req, res) => {
     name: name.trim(),
     brand,
     price: Number(price),
+    salePrice: salePrice !== undefined && salePrice !== '' ? Number(salePrice) : null,
     storage: storage?.trim() || '',
     ram: ram?.trim() || '',
     color: color?.trim() || '',
@@ -77,10 +78,11 @@ export const updatePhone = asyncHandler(async (req, res) => {
     throw new Error('Phone not found');
   }
 
-  const { name, brand, price, storage, ram, color, condition, stock, description, isActive, showOnProductsPage } = req.body;
+  const { name, brand, price, salePrice, storage, ram, color, condition, stock, description, isActive, showOnProductsPage } = req.body;
   if (name) phone.name = name.trim();
   if (brand) phone.brand = brand;
   if (price !== undefined) phone.price = Number(price);
+  if (salePrice !== undefined) phone.salePrice = salePrice !== '' && salePrice !== null ? Number(salePrice) : null;
   if (storage !== undefined) phone.storage = storage.trim();
   if (ram !== undefined) phone.ram = ram.trim();
   if (color !== undefined) phone.color = color.trim();

@@ -82,10 +82,15 @@ function RelatedCard({ product, onClick }) {
       <div style={{ height: 220, display: "flex", alignItems: "center", justifyContent: "center", background: "radial-gradient(circle at 50% 30%,rgba(139,92,246,.14),transparent 60%)" }}>
         {product.images?.[0]?.url
           ? <img src={product.images[0].url} alt={product.name} style={{ maxWidth: "80%", maxHeight: 200, objectFit: "contain", filter: "drop-shadow(0 20px 30px rgba(0,0,0,.6))" }} />
-          : <div style={{ width: 104, height: 214, borderRadius: 24, padding: 6, background: "linear-gradient(160deg,#1b2440,#0a0e1d)", border: "1px solid rgba(255,255,255,.1)" }}><div style={{ width: "100%", height: "100%", borderRadius: 19, background: "linear-gradient(165deg,#8B5CF6,#6C2BD9)" }} /></div>
+          : <div style={{ width: 104, height: 214, borderRadius: 24, padding: 6, background: "linear-gradient(160deg,#1b2440,#0a0e1d)", border: "1px solid rgba(255,255,255,.1)" }}>
+              <div style={{ width: "100%", height: "100%", borderRadius: 19, background: "linear-gradient(165deg,#8B5CF6,#6C2BD9)", position: "relative", overflow: "hidden" }}>
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(115deg,rgba(255,255,255,.28),transparent 40%)" }} />
+              </div>
+            </div>
         }
       </div>
       <div style={{ position: "relative", zIndex: 4, padding: 16 }}>
+        <p style={{ fontFamily: "'JetBrains Mono'", fontSize: 11, color: "#94A3B8", margin: "0 0 4px" }}>{product.brand?.name || ""}</p>
         <h3 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, margin: "0 0 4px", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{product.name}</h3>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
           <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 15, color: "#22D3EE", margin: 0 }}>{displayPrice.toLocaleString()} DA</p>
@@ -96,7 +101,7 @@ function RelatedCard({ product, onClick }) {
   );
 }
 
-export default function ProductDetailsPage() {
+export default function PhoneDetailsPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
@@ -121,7 +126,7 @@ export default function ProductDetailsPage() {
             .catch(() => {});
         }
       })
-      .catch(() => toast.error("Product not found"))
+      .catch(() => toast.error("Phone not found"))
       .finally(() => setLoading(false));
   }, [id]);
 
@@ -152,26 +157,28 @@ export default function ProductDetailsPage() {
 
   if (loading) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <p style={{ fontFamily: "'Space Grotesk'", fontSize: 22, color: "#8B5CF6", animation: "glowPulse 1.5s infinite" }}>Loading product…</p>
+      <p style={{ fontFamily: "'Space Grotesk'", fontSize: 22, color: "#8B5CF6", animation: "glowPulse 1.5s infinite" }}>Loading phone…</p>
     </div>
   );
   if (!product) return (
     <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center" }}>
-      <p style={{ fontFamily: "'Space Grotesk'", fontSize: 22, color: "#94A3B8" }}>Product not found.</p>
+      <p style={{ fontFamily: "'Space Grotesk'", fontSize: 22, color: "#94A3B8" }}>Phone not found.</p>
     </div>
   );
 
   const images = product.images || [];
+  const conditionColor = { new: "#10B981", used: "#F59E0B", refurbished: "#22D3EE" };
 
   return (
-    <div style={{ animation: "fadeIn .5s", maxWidth: 1280, margin: "0 auto", padding: "34px 26px 40px" }}>
-      <button onClick={() => navigate("/products")}
+    <div style={{ animation: "fadeIn .5s", maxWidth: 1280, margin: "0 auto", padding: "34px 26px 80px" }}>
+      <button onClick={() => navigate("/phones")}
         style={{ fontFamily: "'JetBrains Mono'", fontSize: 13, color: "#94A3B8", background: "none", border: "none", cursor: "pointer", marginBottom: 24, display: "inline-flex", alignItems: "center", gap: 7, transition: "color .2s" }}
         onMouseEnter={e => e.currentTarget.style.color = "#fff"}
         onMouseLeave={e => e.currentTarget.style.color = "#94A3B8"}
       >← Back to phones</button>
 
       <div style={{ display: "flex", gap: 46, alignItems: "flex-start", flexWrap: "wrap" }}>
+
         {/* Gallery */}
         <div style={{ flex: "0 0 500px", minWidth: 300, maxWidth: 560, position: "sticky", top: 96, animation: "fadeUp .6s both" }}>
           <div ref={cardRef} onMouseMove={onTilt} onMouseLeave={onTiltLeave}
@@ -179,6 +186,7 @@ export default function ProductDetailsPage() {
           >
             <div style={{ position: "absolute", inset: 0, background: "radial-gradient(300px circle at var(--mx) var(--my),rgba(34,211,238,.18),transparent 60%)", pointerEvents: "none" }} />
             <div style={{ position: "absolute", width: 340, height: 340, borderRadius: "50%", background: "radial-gradient(circle,rgba(139,92,246,.5),transparent 65%)", filter: "blur(50px)", opacity: .45 }} />
+
             {images.length > 0 ? (
               <img src={images[selectedImg]?.url} alt={product.name}
                 style={{ position: "relative", zIndex: 2, maxWidth: "78%", maxHeight: 520, objectFit: "contain", transform: "translateZ(50px)", filter: "drop-shadow(0 50px 90px rgba(0,0,0,.8))", transition: "opacity .25s" }}
@@ -188,10 +196,14 @@ export default function ProductDetailsPage() {
                 <div style={{ width: "100%", height: "100%", borderRadius: 33, background: "linear-gradient(165deg,#8B5CF6,#6C2BD9)", position: "relative", overflow: "hidden" }}>
                   <div style={{ position: "absolute", top: 11, left: "50%", transform: "translateX(-50%)", width: 74, height: 20, borderRadius: 12, background: "#05070f" }} />
                   <div style={{ position: "absolute", inset: 0, background: "linear-gradient(115deg,rgba(255,255,255,.3),transparent 38%)" }} />
+                  <div style={{ position: "absolute", left: 0, right: 0, bottom: 36, textAlign: "center" }}>
+                    <p style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 22, margin: 0 }}>{product.brand?.name || "NOVYX"}</p>
+                  </div>
                 </div>
               </div>
             )}
           </div>
+
           {images.length > 1 && (
             <div style={{ display: "flex", gap: 10, marginTop: 14, justifyContent: "center", flexWrap: "wrap" }}>
               {images.map((img, i) => (
@@ -211,6 +223,11 @@ export default function ProductDetailsPage() {
             {product.brand?.name && (
               <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(139,92,246,.16)", border: "1px solid rgba(139,92,246,.35)", color: "#d7c9ff" }}>{product.brand.name}</span>
             )}
+            {product.condition && (
+              <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: `${conditionColor[product.condition]}18`, border: `1px solid ${conditionColor[product.condition]}55`, color: conditionColor[product.condition], textTransform: "capitalize" }}>
+                {product.condition}
+              </span>
+            )}
             {(product.stock === undefined || product.stock > 4) && (
               <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, color: "#86efac", display: "inline-flex", alignItems: "center", gap: 6 }}>
                 <span style={{ width: 7, height: 7, borderRadius: "50%", background: "#34d399", animation: "ringPulse 2s infinite", display: "block" }} />
@@ -225,12 +242,17 @@ export default function ProductDetailsPage() {
             <p style={{ fontSize: 17, lineHeight: 1.6, color: "#94A3B8", margin: "0 0 18px" }}>{product.description}</p>
           )}
 
-          {(product.storage || product.ram || product.color || product.condition) && (
+          {(product.storage || product.ram || product.color) && (
             <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 18 }}>
-              {product.storage && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(34,211,238,.1)", border: "1px solid rgba(34,211,238,.3)", color: "#67e8f9" }}>{product.storage}</span>}
-              {product.ram && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(34,211,238,.1)", border: "1px solid rgba(34,211,238,.3)", color: "#67e8f9" }}>{product.ram} RAM</span>}
-              {product.color && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", color: "#cbd5e1" }}>{product.color}</span>}
-              {product.condition && <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(16,185,129,.1)", border: "1px solid rgba(16,185,129,.3)", color: "#6ee7b7" }}>{product.condition}</span>}
+              {product.ram && (
+                <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(34,211,238,.1)", border: "1px solid rgba(34,211,238,.3)", color: "#67e8f9" }}>{product.ram} RAM</span>
+              )}
+              {product.storage && (
+                <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(34,211,238,.1)", border: "1px solid rgba(34,211,238,.3)", color: "#67e8f9" }}>{product.storage}</span>
+              )}
+              {product.color && (
+                <span style={{ fontFamily: "'JetBrains Mono'", fontSize: 12, padding: "5px 11px", borderRadius: 8, background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", color: "#cbd5e1" }}>{product.color}</span>
+              )}
             </div>
           )}
 
@@ -275,7 +297,7 @@ export default function ProductDetailsPage() {
         <section style={{ marginTop: 64 }}>
           <h2 style={{ fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 28, letterSpacing: "-.02em", margin: "0 0 22px" }}>You might also like</h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(248px,1fr))", gap: 18 }}>
-            {related.map(p => <RelatedCard key={p._id} product={p} onClick={() => navigate(`/product/${p._id}`)} />)}
+            {related.map(p => <RelatedCard key={p._id} product={p} onClick={() => navigate(`/phone/${p._id}`)} />)}
           </div>
         </section>
       )}

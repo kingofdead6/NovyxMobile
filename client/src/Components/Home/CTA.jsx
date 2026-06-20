@@ -19,7 +19,7 @@ export default function PromoBanner() {
               Bring your old device, get instant credit toward any 2026 flagship. Free express delivery included.
             </p>
             <button
-              onClick={() => navigate("/products")}
+              onClick={() => navigate("/phones")}
               className="nv-mag-btn"
               style={{ padding: "15px 28px", border: "none", borderRadius: 14, background: "#fff", color: "#0a0820", fontFamily: "'Space Grotesk'", fontWeight: 700, fontSize: 16, cursor: "pointer", boxShadow: "0 16px 40px -12px rgba(255,255,255,.4)" }}
             >

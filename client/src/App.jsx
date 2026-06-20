@@ -4,8 +4,6 @@ import HomePage from "./Pages/HomePage";
 import Navbar from "./Components/Shared/NavBar";
 import Footer from "./Components/Shared/Footer";
 
-import ProductsPage from "./Components/Products/Products";
-import ProductDetailsPage from "./Components/Products/ProductDetails";
 
 import CartPage from "./Components/Shared/Cart";
 import Login from "./Pages/Login";
@@ -37,6 +35,7 @@ import AdminAccessories from "./Components/Admin/AdminAccessories.jsx";
 import AdminCases from "./Components/Admin/AdminCases.jsx";
 import AccessoryDetailsPage from "./Components/Products/AccessoryDetails.jsx";
 import CaseDetailsPage from "./Components/Products/CaseDetails.jsx";
+import PhoneDetailsPage from "./Components/Products/PhoneDetails.jsx";
 
 function App() {
   return (
@@ -66,6 +65,7 @@ function App() {
             <Route path="/repair" element={<RepairPage />} />
             <Route path="/accessory/:id" element={<AccessoryDetailsPage />} />
             <Route path="/case/:id" element={<CaseDetailsPage />} />
+            <Route path="/phone/:id" element={<PhoneDetailsPage />} />
             <Route path="/cart" element={<CartPage />} />
             <Route path="/checkout" element={<FinalizeOrder />} />
             <Route path="/login" element={<Login />} />

@@ -114,7 +114,7 @@ export default function BestSellers() {
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(248px,1fr))", gap: 18 }}>
         {products.map((p, i) => (
-          <TiltCard key={p._id} product={p} index={i} onClick={() => navigate(`/product/${p._id}`)} />
+          <TiltCard key={p._id} product={p} index={i} onClick={() => navigate(`/phone/${p._id}`)} />
         ))}
       </div>
     </section>

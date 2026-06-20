@@ -53,7 +53,6 @@ export default function Footer() {
               <FooterLink to="/phones">Phones</FooterLink>
               <FooterLink to="/accessories">Accessories</FooterLink>
               <FooterLink to="/cases">Cases</FooterLink>
-              <FooterLink to="/products">All Products</FooterLink>
             </div>
           </div>
 

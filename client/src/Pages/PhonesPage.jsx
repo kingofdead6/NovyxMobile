@@ -308,7 +308,7 @@ export default function PhonesPage() {
             key={phone._id}
             phone={phone}
             index={i}
-            onClick={() => navigate(`/product/${phone._id}`)}
+            onClick={() => navigate(`/phone/${phone._id}`)}
           />
         ))}
       </div>

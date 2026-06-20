@@ -1,1 +1,1 @@
-The Link to the website : https://mobumes.vercel.app/
+The Link to the website : https://novyx-mobile.vercel.app/
